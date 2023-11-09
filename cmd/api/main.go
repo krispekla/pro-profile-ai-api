@@ -23,6 +23,12 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Get("/ping", ping)
+	r.Post("/login", login)
+	r.Post("/register", register)
+	r.Route("/app", func(r chi.Router) {
+		r.Get("/user-details", userDetails)
+	})
+
 	srv := &http.Server{
 		Addr:     cfg.Addr,
 		Handler:  r,
