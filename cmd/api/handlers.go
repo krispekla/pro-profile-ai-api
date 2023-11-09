@@ -21,19 +21,15 @@ func login(app *config.Application) http.HandlerFunc {
 		password := r.PostFormValue("password")
 		// Check if the email and password are valid
 
-		if email == "" {
-			app.ErrorLog.Print("Missing email")
-			http.Error(w, "Missing email", http.StatusBadRequest)
-			return
-		}
-		if password == "" {
-			app.ErrorLog.Print("Missing password")
-			http.Error(w, "Missing password", http.StatusBadRequest)
+		if email == "" || password == "" {
+			app.ClientError(w, http.StatusBadRequest)
 			return
 		}
 
+		msg := fmt.Sprintf("User %s is logged in", email)
+
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Logged in"))
+		w.Write([]byte(msg))
 	}
 }
 
@@ -44,24 +40,8 @@ func register(app *config.Application) http.HandlerFunc {
 		email := r.PostFormValue("email")
 		password := r.PostFormValue("password")
 
-		if firstName == "" {
-			app.ErrorLog.Print("Missing first name")
-			http.Error(w, "Missing first name", http.StatusBadRequest)
-			return
-		}
-		if lastName == "" {
-			app.ErrorLog.Print("Missing last name")
-			http.Error(w, "Missing last name", http.StatusBadRequest)
-			return
-		}
-		if email == "" {
-			app.ErrorLog.Print("Missing email")
-			http.Error(w, "Missing email", http.StatusBadRequest)
-			return
-		}
-		if password == "" {
-			app.ErrorLog.Print("Missing password")
-			http.Error(w, "Missing password", http.StatusBadRequest)
+		if firstName == "" || lastName == "" || email == "" || password == "" {
+			app.ClientError(w, http.StatusBadRequest)
 			return
 		}
 
