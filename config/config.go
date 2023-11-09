@@ -8,7 +8,7 @@ import (
 )
 
 type Application struct {
-	addr     string
+	Addr     string
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }
@@ -16,8 +16,4 @@ type Application struct {
 func (app *Application) CreateLoggers() {
 	app.InfoLog = log.New(os.Stdout, color.GreenString("INFO\t"), log.Ldate|log.Ltime)
 	app.ErrorLog = log.New(os.Stderr, color.RedString("ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
-}
-
-func (app *Application) GetAddr() *string {
-	return &app.addr
 }

@@ -8,12 +8,7 @@ import (
 	"github.com/krispekla/pro-profile-ai-api/config"
 )
 
-func main() {
-	app := &config.Application{}
-	app.CreateLoggers()
-	flag.StringVar(app.GetAddr(), "addr", ":3002", "Port to run this service on")
-	flag.Parse()
-
+func routes(app *config.Application) *chi.Mux {
 	r := chi.NewRouter()
 	r.Get("/ping", ping(app))
 	r.Post("/login", login(app))
@@ -21,10 +16,18 @@ func main() {
 	r.Route("/app", func(r chi.Router) {
 		r.Get("/user-details", userDetails(app))
 	})
+	return r
+}
+
+func main() {
+	app := &config.Application{}
+	app.CreateLoggers()
+	flag.StringVar(&app.Addr, "addr", ":3002", "Port to run this service on")
+	flag.Parse()
 
 	srv := &http.Server{
-		Addr:     *app.GetAddr(),
-		Handler:  r,
+		Addr:     app.Addr,
+		Handler:  routes(app),
 		ErrorLog: app.ErrorLog,
 	}
 	app.InfoLog.Println("Starting server on port ", srv.Addr)
