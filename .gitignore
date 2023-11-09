@@ -25,3 +25,5 @@ go.work
 
 # Ignore temp log output
 /tmp/**/*
+
+/.vscode/settings.json
