@@ -2,49 +2,32 @@ package main
 
 import (
 	"flag"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/krispekla/pro-profile-ai-api/config"
 )
 
-type Config struct {
-	Addr string
-}
-
-type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-}
-
 func main() {
-	cfg := &Config{}
-	flag.StringVar(&cfg.Addr, "addr", ":3002", "Port to run this service on")
+	app := &config.Application{}
+	app.CreateLoggers()
+	flag.StringVar(app.GetAddr(), "addr", ":3002", "Port to run this service on")
 	flag.Parse()
 
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-	}
-
 	r := chi.NewRouter()
-	r.Get("/ping", app.ping)
-	r.Post("/login", app.login)
-	r.Post("/register", app.register)
+	r.Get("/ping", ping(app))
+	r.Post("/login", login(app))
+	r.Post("/register", register(app))
 	r.Route("/app", func(r chi.Router) {
-		r.Get("/user-details", app.userDetails)
+		r.Get("/user-details", userDetails(app))
 	})
 
 	srv := &http.Server{
-		Addr:     cfg.Addr,
+		Addr:     *app.GetAddr(),
 		Handler:  r,
-		ErrorLog: errorLog,
+		ErrorLog: app.ErrorLog,
 	}
-	infoLog.Println("Starting server on port ", srv.Addr)
+	app.InfoLog.Println("Starting server on port ", srv.Addr)
 	err := srv.ListenAndServe()
-	errorLog.Fatal(err)
+	app.ErrorLog.Fatal(err)
 }
