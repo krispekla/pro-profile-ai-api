@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -17,13 +18,17 @@ func main() {
 	flag.StringVar(&cfg.Addr, "addr", ":3002", "Port to run this service on")
 	flag.Parse()
 
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	r := chi.NewRouter()
 	r.Get("/ping", ping)
 	srv := &http.Server{
-		Addr:    cfg.Addr,
-		Handler: r,
+		Addr:     cfg.Addr,
+		Handler:  r,
+		ErrorLog: errorLog,
 	}
-	log.Println("Starting server on port ", srv.Addr)
+	infoLog.Println("Starting server on port ", srv.Addr)
 	err := srv.ListenAndServe()
-	log.Fatal(err)
+	errorLog.Fatal(err)
 }
