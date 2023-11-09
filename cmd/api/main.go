@@ -13,6 +13,11 @@ type Config struct {
 	Addr string
 }
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	cfg := &Config{}
 	flag.StringVar(&cfg.Addr, "addr", ":3002", "Port to run this service on")
@@ -21,12 +26,17 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	r := chi.NewRouter()
-	r.Get("/ping", ping)
-	r.Post("/login", login)
-	r.Post("/register", register)
+	r.Get("/ping", app.ping)
+	r.Post("/login", app.login)
+	r.Post("/register", app.register)
 	r.Route("/app", func(r chi.Router) {
-		r.Get("/user-details", userDetails)
+		r.Get("/user-details", app.userDetails)
 	})
 
 	srv := &http.Server{
