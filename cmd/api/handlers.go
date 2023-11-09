@@ -17,13 +17,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	// Check if the email and password are valid
 
 	if email == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing email"))
+		http.Error(w, "Missing email", http.StatusBadRequest)
 		return
 	}
 	if password == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing password"))
+		http.Error(w, "Missing password", http.StatusBadRequest)
 		return
 	}
 
@@ -38,23 +36,19 @@ func register(w http.ResponseWriter, r *http.Request) {
 	password := r.PostFormValue("password")
 
 	if firstName == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing first name"))
+		http.Error(w, "Missing first name", http.StatusBadRequest)
 		return
 	}
 	if lastName == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing last name"))
+		http.Error(w, "Missing last name", http.StatusBadRequest)
 		return
 	}
 	if email == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing email"))
+		http.Error(w, "Missing email", http.StatusBadRequest)
 		return
 	}
 	if password == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing password"))
+		http.Error(w, "Missing password", http.StatusBadRequest)
 		return
 	}
 
@@ -64,6 +58,5 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func userDetails(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusUnauthorized)
-	w.Write([]byte("Unauthorized"))
+	http.Error(w, "Unauthorized", http.StatusUnauthorized)
 }
