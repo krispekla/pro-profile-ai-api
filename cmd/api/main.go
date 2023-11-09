@@ -9,10 +9,7 @@ import (
 
 func main() {
 	r := chi.NewRouter()
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Live"))
-	})
+	r.Get("/ping", ping)
 	srv := &http.Server{
 		Addr:    ":3002",
 		Handler: r,
