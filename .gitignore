@@ -22,3 +22,6 @@ go.work
 
 # Build output
 /bin/**/*
+
+# Ignore temp log output
+/tmp/**/*
