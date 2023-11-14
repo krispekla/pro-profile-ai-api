@@ -16,5 +16,13 @@ func routes(app *config.Application) *chi.Mux {
 	r.Route("/app", func(r chi.Router) {
 		r.Get("/user-details", userDetails(app))
 	})
+	r.Route("/yourGroup", func(r chi.Router) {
+		// Apply the middleware to this router
+		r.Use(AuthMidlleware(app))
+
+		// Define your routes
+		r.Post("/login", login(app))
+		// Add more routes as needed
+	})
 	return r
 }
