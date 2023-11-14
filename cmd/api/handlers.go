@@ -7,13 +7,6 @@ import (
 	"github.com/krispekla/pro-profile-ai-api/config"
 )
 
-func ping(app *config.Application) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Live"))
-	}
-}
-
 func login(app *config.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get the username and password from the request body

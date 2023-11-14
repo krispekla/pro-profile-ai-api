@@ -7,7 +7,7 @@ import (
 
 func routes(app *config.Application) *chi.Mux {
 	r := chi.NewRouter()
-	r.Get("/ping", ping(app))
+	r.Use(middleware.Heartbeat("/ping"))
 	r.Post("/login", login(app))
 	r.Post("/register", register(app))
 	r.Route("/app", func(r chi.Router) {
