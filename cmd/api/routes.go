@@ -11,6 +11,7 @@ func routes(app *config.Application) *chi.Mux {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/ping"))
+	r.Use(AuthMiddleware(app))
 	r.Post("/login", login(app))
 	r.Post("/register", register(app))
 	r.Route("/app", func(r chi.Router) {
@@ -18,7 +19,6 @@ func routes(app *config.Application) *chi.Mux {
 	})
 	r.Route("/api/v1/", func(r chi.Router) {
 		// Apply the middleware to this router
-		r.Use(AuthMiddleware(app))
 
 		// Define your routes
 		r.Post("/login", login(app))

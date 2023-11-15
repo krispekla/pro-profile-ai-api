@@ -16,11 +16,13 @@ func AuthMiddleware(app *config.Application) func(next http.Handler) http.Handle
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				app.ClientError(w, http.StatusUnauthorized)
+				return
 			}
 
 			splitToken := strings.Split(authHeader, "Bearer ")
 			if len(splitToken) != 2 {
 				app.ClientError(w, http.StatusUnauthorized)
+				return
 			}
 			tokenStr := splitToken[1]
 			token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
