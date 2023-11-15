@@ -27,3 +27,6 @@ go.work
 /tmp/**/*
 
 /.vscode/settings.json
+
+# Ignore all .env files in the repository
+.env*
