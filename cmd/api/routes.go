@@ -12,17 +12,13 @@ func routes(app *config.Application) *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(AuthMiddleware(app))
-	r.Post("/login", login(app))
-	r.Post("/register", register(app))
-	r.Route("/app", func(r chi.Router) {
-		r.Get("/user-details", userDetails(app))
-	})
-	r.Route("/api/v1/", func(r chi.Router) {
-		// Apply the middleware to this router
-
-		// Define your routes
-		r.Post("/login", login(app))
-		// Add more routes as needed
+	r.Route("/api", func(r chi.Router) {
+		r.Get("/user", userDetails(app))
+		r.Get("/characters", getCharacters(app))
+		r.Post("/characters", createCharacter(app))
+		r.Get("/packages", getPackages(app))
+		r.Get("/packages/:id", getPackageDetails(app))
+		r.Post("/packages/buy", buyPackage(app))
 	})
 	return r
 }
