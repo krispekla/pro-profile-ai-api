@@ -32,15 +32,18 @@ func AuthMiddleware(app *config.Application) func(next http.Handler) http.Handle
 				return []byte(app.JwtSecret), nil
 			})
 
-			if err != nil {
+			if err != nil || token == nil || !token.Valid {
 				app.ClientError(w, http.StatusUnauthorized)
 				return
 			}
-			var user_id interface{}
+			var user_id string
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				fmt.Println(claims["sub"], claims["exp"])
-				user_id = claims["sub"]
-				if user_id == nil || user_id.(string) == "" {
+				if claims["sub"] == nil {
+					app.ClientError(w, http.StatusUnauthorized)
+					return
+				}
+				user_id, ok = claims["sub"].(string) // removed ":" to avoid redeclaration
+				if !ok || user_id == "" {
 					app.ClientError(w, http.StatusUnauthorized)
 					return
 				}
