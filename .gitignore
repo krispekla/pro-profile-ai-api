@@ -30,3 +30,4 @@ go.work
 
 # Ignore all .env files in the repository
 .env*
+!.env.template
