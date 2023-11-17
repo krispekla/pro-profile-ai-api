@@ -1,5 +1,5 @@
 
-db_con ?= "postgres://PPAI_API_DB_USER:$$PPAI_API_DB_PASSWORD@$$PPAI_API_DB_HOST:$$PPAI_API_DB_PORT/$$PPAI_API_DB_NAME?sslmode=disable"
+db_con ?= "postgres://$$PPAI_API_DB_USER:$$PPAI_API_DB_PASSWORD@$$PPAI_API_DB_HOST:$$PPAI_API_DB_PORT/$$PPAI_API_DB_NAME?sslmode=disable"
 
 # ==================================================================================== #
 # HELPERS
