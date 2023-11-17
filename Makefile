@@ -1,3 +1,6 @@
+
+db_con ?= "postgres://PPAI_API_DB_USER:$$PPAI_API_DB_PASSWORD@$$PPAI_API_DB_HOST:$$PPAI_API_DB_PORT/$$PPAI_API_DB_NAME?sslmode=disable"
+
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -63,3 +66,28 @@ run/live:
 		--build.include_ext "go, tpl, tmpl, html, css, scss, js, ts, sql, jpeg, jpg, gif, png, bmp, svg, webp, ico" \
 		--misc.clean_on_exit "true"
 
+## migrate/create: create new migration
+## Usage: make migrate/create name="your_migration_name_here"
+migrate/create:
+	migrate create -ext sql -dir ./migrations -seq $(name)
+
+## migrate/up: run up migration
+.PHONY: migrate/up
+migrate/up:
+	migrate -path ./migrations -database "$(db_con)" up $(n)
+
+## migrate/down: run down migration
+.PHONY: migrate/down
+migrate/down:
+	migrate -path ./migrations -database "$(db_con)" down $(n)
+    # Command to rollback migrations
+
+## migrate/print: print migrate version
+.PHONY: migrate/print
+migrate/print:
+	migrate -path ./migrations -database "$(db_con)" version
+
+## migrate/go: run migration to version
+.PHONY: migrate/go
+migrate/go:
+	migrate -path ./migrations -database "$(db_con)" goto $(v)
