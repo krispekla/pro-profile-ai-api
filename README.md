@@ -6,8 +6,14 @@
 2. Execute command to load variables into shell
 
 ```bash
-export $(grep -v '^#' .env | xargs)
+  export $(grep -v '^#' .env | xargs)
 ```
+<!-- or
+```bash
+  make env/export file=<filename>
+```
+You can replace `.env` with other environment file if you have it defined so you can have multiple like `.env.production`, `.env.local` -->
+
 ## Migrations
 
 1. Install golang-migrate CLI by following the instructions in the [official documentation](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate).
