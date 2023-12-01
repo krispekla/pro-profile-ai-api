@@ -97,7 +97,7 @@ func createCheckoutSession(app *config.Application) http.HandlerFunc {
 		domain := "http://localhost:5173"
 		params := &stripe.CheckoutSessionParams{
 			UIMode:    stripe.String("embedded"),
-			ReturnURL: stripe.String(domain + "/return?session_id={CHECKOUT_SESSION_ID}"),
+			ReturnURL: stripe.String(domain + "/package/buy/return?session_id={CHECKOUT_SESSION_ID}"),
 			LineItems: []*stripe.CheckoutSessionLineItemParams{
 				&stripe.CheckoutSessionLineItemParams{
 					// TODO: Product id from stripe dashboard, adjust for production
