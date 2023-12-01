@@ -55,7 +55,7 @@ build:
 ## run: run the cmd/api application
 .PHONY: run
 run: build
-	./bin/api -addr=$$PPAI_API_ADDR -db-host=$$PPAI_API_DB_HOST -db-port=$$PPAI_API_DB_PORT -db-name=$$PPAI_API_DB_NAME -db-user=$$PPAI_API_DB_USER -db-password=$$PPAI_API_DB_PASSWORD -jwt-secret=$$PPAI_API_SUPABASE_SECRET
+	./bin/api -addr=$$PPAI_API_ADDR -db-host=$$PPAI_API_DB_HOST -db-port=$$PPAI_API_DB_PORT -db-name=$$PPAI_API_DB_NAME -db-user=$$PPAI_API_DB_USER -db-password=$$PPAI_API_DB_PASSWORD -jwt-secret=$$PPAI_API_SUPABASE_SECRET -stripe-secret=$$STRIPE_SECRET
 
 ## run/live: run the application with reloading on file changes
 .PHONY: run/live

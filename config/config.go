@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/stripe/stripe-go/v76"
 )
 
 type Application struct {
@@ -34,5 +35,6 @@ func (app *Application) LoadConfig() {
 	flag.StringVar(&app.DbUser, "db-user", "", "Database user")
 	flag.StringVar(&app.DbPassword, "db-password", "", "Database password")
 	flag.StringVar(&app.JwtSecret, "jwt-secret", "", "JWT secret for checking token validity")
+	flag.StringVar(&stripe.Key, "stripe-secret", "", "Stripe secret key")
 	flag.Parse()
 }
