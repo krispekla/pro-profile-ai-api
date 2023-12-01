@@ -101,7 +101,7 @@ func createCheckoutSession(app *config.Application) http.HandlerFunc {
 			LineItems: []*stripe.CheckoutSessionLineItemParams{
 				&stripe.CheckoutSessionLineItemParams{
 					// TODO: Product id from stripe dashboard, adjust for production
-					Price:    stripe.String("prod_P6gclvthUUSV2K"),
+					Price:    stripe.String("price_1OITFBFSEa3MNRY9u9T0IOy6"),
 					Quantity: stripe.Int64(1),
 				},
 			},
@@ -116,6 +116,6 @@ func createCheckoutSession(app *config.Application) http.HandlerFunc {
 		}
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": ` + s.ClientSecret + `}`))
+		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": "` + s.ClientSecret + `"}`))
 	}
 }
