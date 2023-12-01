@@ -10,6 +10,7 @@ func routes(app *config.Application) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(CorsMiddleware(app))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(AuthMiddleware(app))
 	r.Route("/api", func(r chi.Router) {
