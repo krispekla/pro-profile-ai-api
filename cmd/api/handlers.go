@@ -119,3 +119,12 @@ func createCheckoutSession(app *config.Application) http.HandlerFunc {
 		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": "` + s.ClientSecret + `"}`))
 	}
 }
+
+func retrieveCheckoutSession(app *config.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s, _ := session.Get(r.URL.Query().Get("session_id"), nil)
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Checkout session retrieved", "status": "` + string(s.Status) + `", "customerEmail": "` + string(s.CustomerDetails.Email) + `"}`))
+	}
+}
