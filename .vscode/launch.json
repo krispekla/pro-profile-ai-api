@@ -2,6 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run without debugging",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "make run",
+            "internalConsoleOptions": "neverOpen",
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+        },
+        {
             "name": "Debug API",
             "type": "go",
             "request": "launch",
@@ -15,6 +24,6 @@
             "mode": "test",
             "program": "${workspaceFolder}/${relativeFileDirname}",
             "showLog": true
-          }
+        }
     ]
 }
