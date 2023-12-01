@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/krispekla/pro-profile-ai-api/config"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
 // func login(app *config.Application) http.HandlerFunc {
@@ -87,5 +89,33 @@ func createCharacter(app *config.Application) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"message": "Character created"}`))
+	}
+}
+
+func createCheckoutSession(app *config.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		domain := "http://localhost:5173"
+		params := &stripe.CheckoutSessionParams{
+			UIMode:    stripe.String("embedded"),
+			ReturnURL: stripe.String(domain + "/return?session_id={CHECKOUT_SESSION_ID}"),
+			LineItems: []*stripe.CheckoutSessionLineItemParams{
+				&stripe.CheckoutSessionLineItemParams{
+					// TODO: Product id from stripe dashboard, adjust for production
+					Price:    stripe.String("prod_P6gclvthUUSV2K"),
+					Quantity: stripe.Int64(1),
+				},
+			},
+			Mode:         stripe.String(string(stripe.CheckoutSessionModePayment)),
+			AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{Enabled: stripe.Bool(true)},
+		}
+
+		s, err := session.New(params)
+
+		if err != nil {
+			app.ErrorLog.Print("Error creating checkout session")
+		}
+		w.WriteHeader(http.StatusCreated)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": ` + s.ClientSecret + `}`))
 	}
 }
