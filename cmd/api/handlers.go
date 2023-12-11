@@ -161,15 +161,15 @@ func getAllBuckets(app *config.Application) http.HandlerFunc {
 		//  	"StorageClass": "STANDARD"
 		//  }
 
-		listBucketsOutput, err := client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
-		if err != nil {
-			log.Fatal(err)
-		}
+		// listBucketsOutput, err := client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 
-		for _, object := range listBucketsOutput.Buckets {
-			obj, _ := json.MarshalIndent(object, "", "\t")
-			fmt.Println(string(obj))
-		}
+		// for _, object := range listBucketsOutput.Buckets {
+		// 	obj, _ := json.MarshalIndent(object, "", "\t")
+		// 	fmt.Println(string(obj))
+		// }
 
 		// {
 		// 		"CreationDate": "2022-05-18T17:19:59.645Z",
