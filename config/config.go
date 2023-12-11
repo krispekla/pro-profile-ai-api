@@ -11,6 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/fatih/color"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go/v76"
 )
 
@@ -37,20 +39,34 @@ func (app *Application) CreateLoggers() {
 }
 
 func (app *Application) LoadConfig() {
-	// TODO: Replace with viper
-	flag.StringVar(&app.Addr, "addr", ":3002", "Port to run this service on")
-	flag.StringVar(&app.DbHost, "db-host", "localhost", "Database host")
-	flag.StringVar(&app.DbPort, "db-port", "5432", "Database port")
-	flag.StringVar(&app.DbName, "db-name", "", "Database name")
-	flag.StringVar(&app.DbUser, "db-user", "", "Database user")
-	flag.StringVar(&app.DbPassword, "db-password", "", "Database password")
-	flag.StringVar(&app.JwtSecret, "jwt-secret", "", "JWT secret for checking token validity")
-	flag.StringVar(&stripe.Key, "stripe-secret", "", "Stripe secret key")
-	flag.StringVar(&app.R2AccountId, "r2-account-id", "", "R2 account id")
-	flag.StringVar(&app.R2AccessKeyId, "r2-access-key-id", "", "R2 access key id")
-	flag.StringVar(&app.R2AccessKeySecret, "r2-access-key-secret", "", "R2 access key secret")
-	flag.StringVar(&app.R2BucketName, "r2-bucket-name", "", "R2 bucket name")
-	flag.Parse()
+	var envFilePath string
+	pflag.StringVar(&envFilePath, "env", "./.env", "Path to .env file")
+
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	viper.BindPFlags(pflag.CommandLine)
+	viper.SetConfigType("env")
+	viper.SetConfigFile(envFilePath)
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal(err)
+	}
+	// Load the values from the config file into the application struct
+	app.Addr = viper.GetString("ppai_api_addr")
+	app.DbHost = viper.GetString("ppai_api_db_host")
+	app.DbPort = viper.GetString("ppai_api_db_port")
+	app.DbName = viper.GetString("ppai_api_db_name")
+	app.DbUser = viper.GetString("ppai_api_db_user")
+	app.DbPassword = viper.GetString("ppai_api_db_password")
+	app.JwtSecret = viper.GetString("ppai_api_supabase_secret")
+	stripe.Key = viper.GetString("ppai_api_stripe_secret")
+	app.R2AccountId = viper.GetString("ppai_api_r2_account_id")
+	app.R2AccessKeyId = viper.GetString("ppai_api_r2_access_key_id")
+	app.R2AccessKeySecret = viper.GetString("ppai_api_r2_access_key_secret")
+	app.R2BucketName = viper.GetString("ppai_api_r2_bucket_name")
+	app.InfoLog.Printf("Loaded config: %+v\n", envFilePath)
 }
 
 func (app *Application) SetR2Config() {
@@ -63,6 +79,7 @@ func (app *Application) SetR2Config() {
 	r2Config, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithEndpointResolverWithOptions(r2Resolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.R2AccessKeyId, app.R2AccessKeySecret, "")),
+		config.WithRegion("auto"),
 	)
 	if err != nil {
 		log.Fatal(err)
