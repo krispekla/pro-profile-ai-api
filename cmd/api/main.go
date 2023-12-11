@@ -8,9 +8,9 @@ import (
 
 func main() {
 	app := &config.Application{}
+	app.CreateLoggers()
 	app.LoadConfig()
 	app.SetR2Config()
-	app.CreateLoggers()
 
 	srv := &http.Server{
 		Addr:     app.Addr,
