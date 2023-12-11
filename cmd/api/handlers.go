@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/krispekla/pro-profile-ai-api/config"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
@@ -126,5 +131,49 @@ func retrieveCheckoutSession(app *config.Application) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"message": "Checkout session retrieved", "status": "` + string(s.Status) + `", "customerEmail": "` + string(s.CustomerDetails.Email) + `"}`))
+	}
+}
+
+func getAllBuckets(app *config.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		client := s3.NewFromConfig(*app.R2Config)
+
+		listObjectsOutput, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+			Bucket: &app.R2BucketName,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, object := range listObjectsOutput.Contents {
+			obj, _ := json.MarshalIndent(object, "", "\t")
+			fmt.Println(string(obj))
+		}
+
+		//  {
+		//  	"ChecksumAlgorithm": null,
+		//  	"ETag": "\"eb2b891dc67b81755d2b726d9110af16\"",
+		//  	"Key": "ferriswasm.png",
+		//  	"LastModified": "2022-05-18T17:20:21.67Z",
+		//  	"Owner": null,
+		//  	"Size": 87671,
+		//  	"StorageClass": "STANDARD"
+		//  }
+
+		listBucketsOutput, err := client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, object := range listBucketsOutput.Buckets {
+			obj, _ := json.MarshalIndent(object, "", "\t")
+			fmt.Println(string(obj))
+		}
+
+		// {
+		// 		"CreationDate": "2022-05-18T17:19:59.645Z",
+		// 		"Name": "sdk-example"
+		// }
 	}
 }
