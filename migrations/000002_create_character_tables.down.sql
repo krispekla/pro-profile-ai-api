@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS character_model;
+DROP TABLE IF EXISTS character_img;
+DROP TABLE IF EXISTS character;
+DROP TYPE IF EXISTS age;
+DROP TYPE IF EXISTS ethnicity;
+DROP TYPE IF EXISTS eye_color;
+DROP TYPE IF EXISTS hair_color;
+DROP TYPE IF EXISTS gender;
