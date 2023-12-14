@@ -151,6 +151,9 @@ func getAllBuckets(app *config.Application) http.HandlerFunc {
 			fmt.Println(string(obj))
 		}
 
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"message": "Buckets retrieved"}`))
+
 		//  {
 		//  	"ChecksumAlgorithm": null,
 		//  	"ETag": "\"eb2b891dc67b81755d2b726d9110af16\"",
@@ -175,5 +178,33 @@ func getAllBuckets(app *config.Application) http.HandlerFunc {
 		// 		"CreationDate": "2022-05-18T17:19:59.645Z",
 		// 		"Name": "sdk-example"
 		// }
+	}
+}
+
+func getPresignedImgUrl(app *config.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		client := s3.NewFromConfig(*app.R2Config)
+		presignClient := s3.NewPresignClient(client)
+
+		key := "kris555.jpg"
+
+		// presignResult, err := presignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		// 	Bucket: &app.R2BucketName,
+		// 	Key:    &key,
+		// })
+
+		presignResult, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
+			Bucket: &app.R2BucketName,
+			Key:    &key,
+		})
+
+		if err != nil {
+			panic("Couldn't get presigned URL for GetObject")
+		}
+
+		fmt.Printf("Presigned URL For object: %s\n", presignResult.URL)
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Presigned URL retrieved", "url": "` + presignResult.URL + `"}`))
 	}
 }
