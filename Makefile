@@ -91,3 +91,8 @@ migrate/print:
 .PHONY: migrate/go
 migrate/go:
 	migrate -path ./migrations -database "$(db_con)" goto $(v)
+
+## migrate/force: force migrate to version
+.PHONY: migrate/force
+migrate/force:
+	migrate -path ./migrations -database "$(db_con)" force $(v)
