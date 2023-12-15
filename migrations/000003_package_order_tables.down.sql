@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS generated_package_img;
+DROP TABLE IF EXISTS generated_package;
+DROP TABLE IF EXISTS package_order_item;
+DROP TABLE IF EXISTS package_order;
+DROP TYPE IF EXISTS order_status;
+DROP TABLE IF EXISTS package_example_img;
+DROP TABLE IF EXISTS coupon;
+DROP TABLE IF EXISTS package_price;
+DROP TABLE IF EXISTS package;
