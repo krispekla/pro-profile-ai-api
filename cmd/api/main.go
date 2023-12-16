@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/krispekla/pro-profile-ai-api/config"
+	"github.com/krispekla/pro-profile-ai-api/storage"
 )
 
 func main() {
@@ -11,6 +12,7 @@ func main() {
 	app.CreateLoggers()
 	app.LoadConfig()
 	app.SetR2Config()
+	storage.OpenDb(app)
 
 	srv := &http.Server{
 		Addr:     app.Addr,

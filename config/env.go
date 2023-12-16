@@ -4,14 +4,19 @@ import (
 	"flag"
 	"log"
 
+	"database/sql"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go/v76"
+
+	_ "github.com/lib/pq"
 )
 
 type Application struct {
 	Addr          string
+	Db            *sql.DB
 	JwtSecret     string
 	StorageConfig *StorageConfig
 	ErrorLog      *log.Logger
