@@ -21,5 +21,6 @@ func main() {
 	}
 	app.InfoLog.Println("Starting server on port ", srv.Addr)
 	err := srv.ListenAndServe()
+	defer app.Db.Close()
 	app.ErrorLog.Fatal(err)
 }

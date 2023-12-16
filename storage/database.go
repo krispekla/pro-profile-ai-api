@@ -14,7 +14,6 @@ func OpenDb(app *config.Application) {
 	if err != nil {
 		app.ErrorLog.Panicf("Error opening database connection: %v", err)
 	}
-	defer db.Close()
 	app.Db = db
 	app.InfoLog.Println("Database connection established")
 }
