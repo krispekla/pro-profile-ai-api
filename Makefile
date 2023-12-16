@@ -96,3 +96,8 @@ migrate/go:
 .PHONY: migrate/force
 migrate/force:
 	migrate -path ./migrations -database "$(db_con)" force $(v)
+
+## seed: seed database with test data
+.PHONY: seed
+seed:
+	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./migrations/seed_fake.sql
