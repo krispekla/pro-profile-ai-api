@@ -53,7 +53,7 @@ END IF;
 END $$;
 CREATE TABLE IF NOT EXISTS package_order (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES user_account (id) NOT NULL,
+    user_id UUID REFERENCES auth.users (id) NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total_amount INT NOT NULL,
     currency TEXT NOT NULL,

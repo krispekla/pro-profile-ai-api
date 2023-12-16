@@ -30,7 +30,11 @@ INSERT INTO character (
         age
     )
 VALUES (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         'John Doe',
         'male',
         'black',
@@ -39,7 +43,11 @@ VALUES (
         'adult'
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         'Jane Doe',
         'female',
         'blond',
@@ -451,7 +459,11 @@ INSERT INTO package_order (
         coupon_id
     )
 VALUES (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         10,
         'USD',
         'paid',
@@ -462,28 +474,44 @@ VALUES (
         )
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         69,
         'USD',
         'paid',
         NULL
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         20,
         'USD',
         'created',
         NULL
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         20,
         'USD',
         'pending',
         NULL
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         10,
         'USD',
         'cancelled',
@@ -494,7 +522,11 @@ VALUES (
         )
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM auth.users
+            WHERE email = 'outwork.trope.0x@icloud.com'
+        ),
         20,
         'USD',
         'refunded',
