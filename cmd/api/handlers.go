@@ -140,7 +140,7 @@ func getAllBuckets(app *config.Application) http.HandlerFunc {
 		client := s3.NewFromConfig(*app.R2Config)
 
 		listObjectsOutput, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-			Bucket: &app.R2BucketName,
+			Bucket: &app.StorageConfig.R2BucketName,
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -194,7 +194,7 @@ func getPresignedImgUrl(app *config.Application) http.HandlerFunc {
 		// })
 
 		presignResult, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
-			Bucket: &app.R2BucketName,
+			Bucket: &app.StorageConfig.R2BucketName,
 			Key:    &key,
 		})
 
