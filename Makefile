@@ -101,3 +101,9 @@ migrate/force:
 .PHONY: seed
 seed:
 	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./migrations/seed_fake.sql
+
+## generate: generate code from database schema
+.PHONY: generate
+generate:
+	jet -dsn=$(db_con) -schema=auth -path=./.gen
+	jet -dsn=$(db_con) -schema=public -path=./.gen
