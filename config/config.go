@@ -5,12 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/fatih/color"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go/v76"
@@ -31,11 +29,6 @@ type Application struct {
 	ErrorLog          *log.Logger
 	InfoLog           *log.Logger
 	R2Config          *aws.Config
-}
-
-func (app *Application) CreateLoggers() {
-	app.InfoLog = log.New(os.Stdout, color.GreenString("INFO\t"), log.Ldate|log.Ltime)
-	app.ErrorLog = log.New(os.Stderr, color.RedString("ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func (app *Application) LoadConfig() {
