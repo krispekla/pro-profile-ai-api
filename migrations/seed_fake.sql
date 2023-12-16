@@ -8,17 +8,17 @@ BEGIN FOR table_name IN (
 ) LOOP EXECUTE 'TRUNCATE TABLE ' || table_name || ' CASCADE';
 END LOOP;
 END $$;
-INSERT INTO user_account (supa_id, name, email)
-VALUES (
-        'supa_id_1',
-        'John Doe',
-        'outwork.trope.0x@icloud.com'
-    ),
-    (
-        'supa_id_2',
-        'Jane Smith',
-        'jane.smith@example.com'
-    );
+-- INSERT INTO user_account (supa_id, name, email)
+-- VALUES (
+--         'supa_id_1',
+--         'John Doe',
+--         'outwork.trope.0x@icloud.com'
+--     ),
+--     (
+--         'supa_id_2',
+--         'Jane Smith',
+--         'jane.smith@example.com'
+--     );
 -- Insert character section
 INSERT INTO character (
         user_id,
