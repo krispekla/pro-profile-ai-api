@@ -38,13 +38,19 @@ CREATE TABLE IF NOT EXISTS package_example_img (
     package_id INT REFERENCES package (id) NOT NULL,
     img_url TEXT NOT NULL
 );
-CREATE TYPE order_status AS ENUM (
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'order_status'
+) THEN CREATE TYPE order_status AS ENUM (
     'created',
     'pending',
     'paid',
     'cancelled',
     'refunded'
 );
+END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS package_order (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user_account (id) NOT NULL,

@@ -1,5 +1,15 @@
-CREATE TYPE gender AS ENUM ('male', 'female', 'other');
-CREATE TYPE hair_color AS ENUM (
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'gender'
+) THEN CREATE TYPE gender AS ENUM ('male', 'female', 'other');
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'hair_color'
+) THEN CREATE TYPE hair_color AS ENUM (
     'black',
     'brown',
     'blond',
@@ -8,9 +18,29 @@ CREATE TYPE hair_color AS ENUM (
     'nohair',
     'other'
 );
-CREATE TYPE eye_color AS ENUM ('brown', 'blue', 'green', 'gray');
-CREATE TYPE ethnicity AS ENUM ('light', 'medium', 'dark', 'other');
-CREATE TYPE age AS ENUM ('child', 'adult', 'elderly');
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'eye_color'
+) THEN CREATE TYPE eye_color AS ENUM ('brown', 'blue', 'green', 'gray');
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'ethnicity'
+) THEN CREATE TYPE ethnicity AS ENUM ('light', 'medium', 'dark', 'other');
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'age'
+) THEN CREATE TYPE age AS ENUM ('child', 'adult', 'elderly');
+END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS character (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user_account (id) NOT NULL,
