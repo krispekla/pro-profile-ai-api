@@ -8,7 +8,12 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	. "github.com/go-jet/jet/v2/postgres"
+	authTable "github.com/krispekla/pro-profile-ai-api/.gen/postgres/auth/table"
+	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
+	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
 	"github.com/krispekla/pro-profile-ai-api/config"
+	_ "github.com/lib/pq"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 )
@@ -59,9 +64,33 @@ func userDetails(app *config.Application) http.HandlerFunc {
 
 func getCharacters(app *config.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		stmt := SELECT(
+			Character.AllColumns,
+			authTable.Users.Email.AS("email"),
+		).FROM(Character.INNER_JOIN(
+			authTable.Users, Character.UserID.EQ(authTable.Users.ID))).LIMIT(1)
+		// TODO: Return only for user
+		// .WHERE(
+		// Character.UserID.EQ(get url from request)
+		// )
+
+		var result []struct {
+			model.Character
+			email string `db:"email"`
+		}
+
+		err := stmt.Query(app.Db, &result)
+		if err != nil {
+			app.ErrorLog.Print("Error retrieving characters")
+		}
+		jsonResult, err := json.Marshal(result)
+		if err != nil {
+			app.ErrorLog.Print("Error marshaling characters")
+		}
+
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"characters": [{"name": "John Doe", "age": 30}, {"name": "Jane Doe", "age": 25}]}`))
+		w.Write(jsonResult)
 	}
 }
 
