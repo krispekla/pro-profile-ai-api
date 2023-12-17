@@ -9,10 +9,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	authTable "github.com/krispekla/pro-profile-ai-api/.gen/postgres/auth/table"
 	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
 	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
 	"github.com/krispekla/pro-profile-ai-api/config"
+	"github.com/krispekla/pro-profile-ai-api/types"
 	_ "github.com/lib/pq"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
@@ -64,15 +66,12 @@ func userDetails(app *config.Application) http.HandlerFunc {
 
 func getCharacters(app *config.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
 		stmt := SELECT(
 			Character.AllColumns,
 			authTable.Users.Email.AS("email"),
-		).FROM(Character.INNER_JOIN(
-			authTable.Users, Character.UserID.EQ(authTable.Users.ID))).LIMIT(1)
-		// TODO: Return only for user
-		// .WHERE(
-		// Character.UserID.EQ(get url from request)
-		// )
+		).FROM(Character.LEFT_JOIN(
+			authTable.Users, Character.UserID.EQ(UUID(uuid.MustParse(usr.Id)))))
 
 		var result []struct {
 			model.Character
