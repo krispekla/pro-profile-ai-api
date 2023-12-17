@@ -12,7 +12,7 @@ func routes(app *config.Application) *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(CorsMiddleware(app))
 	r.Use(middleware.Heartbeat("/ping"))
-	// r.Use(AuthMiddleware(app))
+	r.Use(AuthMiddleware(app))
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/user", userDetails(app))
 		r.Get("/characters", getCharacters(app))
