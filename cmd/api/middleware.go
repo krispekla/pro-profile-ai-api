@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/krispekla/pro-profile-ai-api/config"
+	"github.com/krispekla/pro-profile-ai-api/types"
 )
 
 func AuthMiddleware(app *config.Application) func(next http.Handler) http.Handler {
@@ -37,20 +38,26 @@ func AuthMiddleware(app *config.Application) func(next http.Handler) http.Handle
 				app.ClientError(w, http.StatusUnauthorized)
 				return
 			}
-			var user_id string
+			user := &types.JwtUser{}
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				if claims["sub"] == nil {
+				if userId, ok := claims["sub"].(string); ok {
+					user.Id = userId
+				} else {
 					app.ClientError(w, http.StatusUnauthorized)
 					return
 				}
-				user_id, ok = claims["sub"].(string) // removed ":" to avoid redeclaration
-				if !ok || user_id == "" {
-					app.ClientError(w, http.StatusUnauthorized)
-					return
+				if email, ok := claims["email"].(string); ok {
+					user.Email = email
+				}
+				if role, ok := claims["role"].(string); ok {
+					user.Role = role
+				}
+				if sessionId, ok := claims["session_id"].(string); ok {
+					user.SessionId = sessionId
 				}
 			}
-			ctx := context.WithValue(r.Context(), "user", "123")
-			app.InfoLog.Println("User is logged in with id: ", user_id)
+			ctx := context.WithValue(r.Context(), types.UserContextKey, user)
+			app.InfoLog.Printf("User is logged in with id: %s", user.Id)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
