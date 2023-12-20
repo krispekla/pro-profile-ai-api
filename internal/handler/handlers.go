@@ -7,30 +7,29 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
-	authTable "github.com/krispekla/pro-profile-ai-api/.gen/postgres/auth/table"
-	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
-	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
+	"github.com/krispekla/pro-profile-ai-api/internal/repository"
 	"github.com/krispekla/pro-profile-ai-api/types"
-	_ "github.com/lib/pq"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
 type Handler struct {
-	Db       *sql.DB
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
-	R2Config *aws.Config
+	Db            *sql.DB
+	ErrorLog      *log.Logger
+	InfoLog       *log.Logger
+	R2Config      *aws.Config
+	CharacterRepo *repository.CharacterRepositoryImpl
 }
 
 func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config *aws.Config) *Handler {
+	characterRepo := repository.NewCharacterRepositoryImpl(db)
 	return &Handler{
-		Db:       db,
-		ErrorLog: errorLog,
-		InfoLog:  infoLog,
-		R2Config: r2Config,
+		Db:            db,
+		ErrorLog:      errorLog,
+		InfoLog:       infoLog,
+		R2Config:      r2Config,
+		CharacterRepo: characterRepo,
 	}
 }
 
@@ -44,18 +43,12 @@ func (h *Handler) UserDetails() http.HandlerFunc {
 func (h *Handler) GetCharacters() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
-		stmt := SELECT(
-			Character.AllColumns,
-			authTable.Users.Email.AS("email"),
-		).FROM(Character.LEFT_JOIN(
-			authTable.Users, Character.UserID.EQ(UUID(uuid.MustParse(usr.Id)))))
-
-		var result []struct {
-			model.Character
-			email string `db:"email"`
+		usrId, err := uuid.Parse(usr.Id)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
 		}
-
-		err := stmt.Query(h.Db, &result)
+		// Check to see if
+		result, err := h.CharacterRepo.Get(usrId)
 		if err != nil {
 			h.ErrorLog.Print("Error retrieving characters")
 		}
