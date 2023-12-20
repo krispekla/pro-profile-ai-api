@@ -14,6 +14,12 @@ import (
 	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
+/*
+Package handler provides HTTP request handlers for various endpoints.
+
+For now, all the handlers are implemented in a single file until the file becomes too large.
+*/
+
 type Handler struct {
 	Db            *sql.DB
 	ErrorLog      *log.Logger
