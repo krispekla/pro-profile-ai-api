@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"context"
 	"database/sql"
 	"flag"
 	"fmt"
@@ -11,10 +10,8 @@ import (
 	"runtime/debug"
 
 	"github.com/krispekla/pro-profile-ai-api/internal/database"
+	"github.com/krispekla/pro-profile-ai-api/internal/services"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/fatih/color"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -22,31 +19,25 @@ import (
 )
 
 type Application struct {
-	Config   *AppConfig
-	Db       *sql.DB
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
+	Config    *AppConfig
+	Db        *sql.DB
+	R2Service *services.R2Service
+	ErrorLog  *log.Logger
+	InfoLog   *log.Logger
 }
 
 type AppConfig struct {
 	Addr          string
 	JwtSecret     string
 	StorageConfig *database.DbConn
-	R2StorageCfg  *R2StorageCfg
-	R2Config      *aws.Config
-}
-type R2StorageCfg struct {
-	R2AccountId       string
-	R2AccessKeyId     string
-	R2AccessKeySecret string
-	R2BucketName      string
+	R2StorageCfg  *services.R2Config
 }
 
 func NewApplication() *Application {
 	app := &Application{}
 	app.CreateLoggers()
 	app.Config = loadConfig(app)
-	app.SetR2Config()
+	app.R2Service = services.NewR2Service(app.Config.R2StorageCfg)
 	return app
 }
 
@@ -87,29 +78,11 @@ func (app *Application) CreateLoggers() {
 	app.ErrorLog = log.New(os.Stderr, color.RedString("ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-func (app *Application) SetR2Config() {
-	r2Resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		return aws.Endpoint{
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", app.Config.R2StorageCfg.R2AccountId),
-		}, nil
-	})
-
-	r2Config, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithEndpointResolverWithOptions(r2Resolver),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.Config.R2StorageCfg.R2AccessKeyId, app.Config.R2StorageCfg.R2AccessKeySecret, "")),
-		config.WithRegion("auto"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	app.Config.R2Config = &r2Config
-}
-
 func loadConfig(app *Application) *AppConfig {
 	var envFilePath string
 	cfg := &AppConfig{}
 	storCfg := &database.DbConn{}
-	r2Config := &R2StorageCfg{}
+	r2Config := &services.R2Config{}
 
 	pflag.StringVar(&envFilePath, "env", "../../.env", "Path to .env file")
 
