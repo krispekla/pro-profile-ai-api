@@ -10,6 +10,8 @@ import (
 	"os"
 	"runtime/debug"
 
+	"github.com/krispekla/pro-profile-ai-api/internal/database"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -23,18 +25,13 @@ type Application struct {
 	Addr          string
 	Db            *sql.DB
 	JwtSecret     string
-	StorageConfig *StorageConfig
+	StorageConfig *database.DbConn
+	R2StorageCfg  *R2StorageCfg
 	ErrorLog      *log.Logger
 	InfoLog       *log.Logger
 	R2Config      *aws.Config
 }
-
-type StorageConfig struct {
-	DbHost            string
-	DbPort            string
-	DbName            string
-	DbUser            string
-	DbPassword        string
+type R2StorageCfg struct {
 	R2AccountId       string
 	R2AccessKeyId     string
 	R2AccessKeySecret string
@@ -47,7 +44,7 @@ func NewApplication() *Application {
 	app.CreateLoggers()
 	app.LoadConfig()
 	app.SetR2Config()
-	db, err := setupDatabase(app.StorageConfig) // Assume this function sets up your database
+	db, err := database.SetupDatabase(app.StorageConfig) // Assume this function sets up your database
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
@@ -69,16 +66,6 @@ func (app *Application) Run() {
 	err := srv.ListenAndServe()
 	defer app.Db.Close()
 	app.ErrorLog.Fatal(err)
-}
-
-func setupDatabase(cfg *StorageConfig) (*sql.DB, error) {
-	dbConn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DbHost, cfg.DbPort, cfg.DbUser, cfg.DbPassword, cfg.DbName)
-	db, err := sql.Open("postgres", dbConn)
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
 }
 
 func (app *Application) ServerError(w http.ResponseWriter, err error) {
@@ -103,13 +90,13 @@ func (app *Application) CreateLoggers() {
 func (app *Application) SetR2Config() {
 	r2Resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		return aws.Endpoint{
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", app.StorageConfig.R2AccountId),
+			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", app.R2StorageCfg.R2AccountId),
 		}, nil
 	})
 
 	r2Config, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithEndpointResolverWithOptions(r2Resolver),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.StorageConfig.R2AccessKeyId, app.StorageConfig.R2AccessKeySecret, "")),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.R2StorageCfg.R2AccessKeyId, app.R2StorageCfg.R2AccessKeySecret, "")),
 		config.WithRegion("auto"),
 	)
 	if err != nil {
@@ -120,7 +107,8 @@ func (app *Application) SetR2Config() {
 
 func (app *Application) LoadConfig() {
 	var envFilePath string
-	storageConfig := &StorageConfig{}
+	storageConfig := &database.DbConn{}
+	r2Config := &R2StorageCfg{}
 
 	pflag.StringVar(&envFilePath, "env", "../../.env", "Path to .env file")
 
@@ -144,10 +132,11 @@ func (app *Application) LoadConfig() {
 	storageConfig.DbPassword = viper.GetString("ppai_api_db_password")
 	app.JwtSecret = viper.GetString("ppai_api_supabase_secret")
 	stripe.Key = viper.GetString("ppai_api_stripe_secret")
-	storageConfig.R2AccountId = viper.GetString("ppai_api_r2_account_id")
-	storageConfig.R2AccessKeyId = viper.GetString("ppai_api_r2_access_key_id")
-	storageConfig.R2AccessKeySecret = viper.GetString("ppai_api_r2_access_key_secret")
-	storageConfig.R2BucketName = viper.GetString("ppai_api_r2_bucket_name")
+	r2Config.R2AccountId = viper.GetString("ppai_api_r2_account_id")
+	r2Config.R2AccessKeyId = viper.GetString("ppai_api_r2_access_key_id")
+	r2Config.R2AccessKeySecret = viper.GetString("ppai_api_r2_access_key_secret")
+	r2Config.R2BucketName = viper.GetString("ppai_api_r2_bucket_name")
 	app.StorageConfig = storageConfig
+	app.R2StorageCfg = r2Config
 	app.InfoLog.Printf("Loaded config: %+v\n", envFilePath)
 }
