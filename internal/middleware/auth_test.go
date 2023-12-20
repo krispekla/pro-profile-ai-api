@@ -8,7 +8,7 @@ package middleware
 // 	"net/http/httptest"
 // 	"testing"
 // )
-
+// TODO: Fix
 // func TestAuthMiddleware(t *testing.T) {
 // 	tests := []struct {
 // 		name  string
