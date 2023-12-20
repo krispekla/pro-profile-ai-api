@@ -8,8 +8,8 @@ import (
 )
 
 func routes(app *Application) *chi.Mux {
-	hls := handler.NewHandler(app.Db, app.ErrorLog, app.InfoLog, app.R2Config)
-	mdlw := customMiddleware.NewMiddleware(app.JwtSecret, app.InfoLog, app.ClientError)
+	hls := handler.NewHandler(app.Db, app.ErrorLog, app.InfoLog, app.Config.R2Config)
+	mdlw := customMiddleware.NewMiddleware(app.Config.JwtSecret, app.InfoLog, app.ClientError)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)

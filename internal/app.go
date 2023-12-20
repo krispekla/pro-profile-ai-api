@@ -22,13 +22,17 @@ import (
 )
 
 type Application struct {
+	Config   *AppConfig
+	Db       *sql.DB
+	ErrorLog *log.Logger
+	InfoLog  *log.Logger
+}
+
+type AppConfig struct {
 	Addr          string
-	Db            *sql.DB
 	JwtSecret     string
 	StorageConfig *database.DbConn
 	R2StorageCfg  *R2StorageCfg
-	ErrorLog      *log.Logger
-	InfoLog       *log.Logger
 	R2Config      *aws.Config
 }
 type R2StorageCfg struct {
@@ -39,31 +43,27 @@ type R2StorageCfg struct {
 }
 
 func NewApplication() *Application {
-	// TODO pass from main
 	app := &Application{}
 	app.CreateLoggers()
-	app.LoadConfig()
+	app.Config = loadConfig(app)
 	app.SetR2Config()
-	db, err := database.SetupDatabase(app.StorageConfig) // Assume this function sets up your database
-	if err != nil {
-		log.Fatalf("Could not set up database: %v", err)
-	}
-	app.Db = db
-
 	return app
 }
 
 func (app *Application) Run() {
+	db, err := database.SetupDatabase(app.Config.StorageConfig) // Assume this function sets up your database
+	if err != nil {
+		log.Fatalf("Could not set up database: %v", err)
+	}
+	app.Db = db
 	r := routes(app)
-	// Start your server with the router
 	srv := &http.Server{
-		Addr:     app.Addr,
+		Addr:     app.Config.Addr,
 		Handler:  r,
 		ErrorLog: app.ErrorLog,
 	}
-	// srv.ListenAndServe()
-	app.InfoLog.Println("Starting server on port ", srv.Addr)
-	err := srv.ListenAndServe()
+	app.InfoLog.Println("Starting server on:", srv.Addr)
+	err = srv.ListenAndServe()
 	defer app.Db.Close()
 	app.ErrorLog.Fatal(err)
 }
@@ -90,24 +90,25 @@ func (app *Application) CreateLoggers() {
 func (app *Application) SetR2Config() {
 	r2Resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		return aws.Endpoint{
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", app.R2StorageCfg.R2AccountId),
+			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", app.Config.R2StorageCfg.R2AccountId),
 		}, nil
 	})
 
 	r2Config, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithEndpointResolverWithOptions(r2Resolver),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.R2StorageCfg.R2AccessKeyId, app.R2StorageCfg.R2AccessKeySecret, "")),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(app.Config.R2StorageCfg.R2AccessKeyId, app.Config.R2StorageCfg.R2AccessKeySecret, "")),
 		config.WithRegion("auto"),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.R2Config = &r2Config
+	app.Config.R2Config = &r2Config
 }
 
-func (app *Application) LoadConfig() {
+func loadConfig(app *Application) *AppConfig {
 	var envFilePath string
-	storageConfig := &database.DbConn{}
+	cfg := &AppConfig{}
+	storCfg := &database.DbConn{}
 	r2Config := &R2StorageCfg{}
 
 	pflag.StringVar(&envFilePath, "env", "../../.env", "Path to .env file")
@@ -124,19 +125,23 @@ func (app *Application) LoadConfig() {
 		log.Fatal(err)
 	}
 	// Load the values from the config file into the application struct
-	app.Addr = viper.GetString("ppai_api_addr")
-	storageConfig.DbHost = viper.GetString("ppai_api_db_host")
-	storageConfig.DbPort = viper.GetString("ppai_api_db_port")
-	storageConfig.DbName = viper.GetString("ppai_api_db_name")
-	storageConfig.DbUser = viper.GetString("ppai_api_db_user")
-	storageConfig.DbPassword = viper.GetString("ppai_api_db_password")
-	app.JwtSecret = viper.GetString("ppai_api_supabase_secret")
+	cfg.Addr = viper.GetString("ppai_api_addr")
+	cfg.JwtSecret = viper.GetString("ppai_api_supabase_secret")
+
+	storCfg.DbHost = viper.GetString("ppai_api_db_host")
+	storCfg.DbPort = viper.GetString("ppai_api_db_port")
+	storCfg.DbName = viper.GetString("ppai_api_db_name")
+	storCfg.DbUser = viper.GetString("ppai_api_db_user")
+	storCfg.DbPassword = viper.GetString("ppai_api_db_password")
 	stripe.Key = viper.GetString("ppai_api_stripe_secret")
+
 	r2Config.R2AccountId = viper.GetString("ppai_api_r2_account_id")
 	r2Config.R2AccessKeyId = viper.GetString("ppai_api_r2_access_key_id")
 	r2Config.R2AccessKeySecret = viper.GetString("ppai_api_r2_access_key_secret")
 	r2Config.R2BucketName = viper.GetString("ppai_api_r2_bucket_name")
-	app.StorageConfig = storageConfig
-	app.R2StorageCfg = r2Config
+
+	cfg.StorageConfig = storCfg
+	cfg.R2StorageCfg = r2Config
 	app.InfoLog.Printf("Loaded config: %+v\n", envFilePath)
+	return cfg
 }
