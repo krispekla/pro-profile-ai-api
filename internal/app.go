@@ -33,28 +33,24 @@ type AppConfig struct {
 	R2StorageCfg  *services.R2Config
 }
 
-func NewApplication() *Application {
-	app := &Application{}
-	app.CreateLoggers()
-	app.Config = loadConfig(app)
-	app.R2Service = services.NewR2Service(app.Config.R2StorageCfg)
-	return app
+func NewApplication(config *AppConfig, db *sql.DB, r2Service *services.R2Service, infoLog *log.Logger, errorLog *log.Logger) *Application {
+	return &Application{
+		Config:    config,
+		Db:        db,
+		R2Service: r2Service,
+		ErrorLog:  errorLog,
+		InfoLog:   infoLog,
+	}
 }
 
 func (app *Application) Run() {
-	db, err := database.SetupDatabase(app.Config.StorageConfig) // Assume this function sets up your database
-	if err != nil {
-		log.Fatalf("Could not set up database: %v", err)
-	}
-	app.Db = db
-	r := routes(app)
 	srv := &http.Server{
 		Addr:     app.Config.Addr,
-		Handler:  r,
+		Handler:  routes(app),
 		ErrorLog: app.ErrorLog,
 	}
 	app.InfoLog.Println("Starting server on:", srv.Addr)
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 	defer app.Db.Close()
 	app.ErrorLog.Fatal(err)
 }
@@ -73,12 +69,13 @@ func (app *Application) NotFound(w http.ResponseWriter) {
 	app.ClientError(w, http.StatusNotFound)
 }
 
-func (app *Application) CreateLoggers() {
-	app.InfoLog = log.New(os.Stdout, color.GreenString("INFO\t"), log.Ldate|log.Ltime)
-	app.ErrorLog = log.New(os.Stderr, color.RedString("ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
+func CreateLoggers() (*log.Logger, *log.Logger) {
+	infoLog := log.New(os.Stdout, color.GreenString("INFO\t"), log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, color.RedString("ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
+	return infoLog, errorLog
 }
 
-func loadConfig(app *Application) *AppConfig {
+func LoadConfig() *AppConfig {
 	var envFilePath string
 	cfg := &AppConfig{}
 	storCfg := &database.DbConn{}
@@ -115,6 +112,5 @@ func loadConfig(app *Application) *AppConfig {
 
 	cfg.StorageConfig = storCfg
 	cfg.R2StorageCfg = r2Config
-	app.InfoLog.Printf("Loaded config: %+v\n", envFilePath)
 	return cfg
 }
