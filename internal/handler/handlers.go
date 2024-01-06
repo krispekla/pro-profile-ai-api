@@ -26,16 +26,19 @@ type Handler struct {
 	InfoLog       *log.Logger
 	R2Config      *aws.Config
 	CharacterRepo *repository.CharacterRepositoryImpl
+	PackageRepo   *repository.PackageRepositoryImpl
 }
 
 func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config *aws.Config) *Handler {
 	characterRepo := repository.NewCharacterRepositoryImpl(db)
+	packageRepo := repository.NewPackageRepositoryImpl(db)
 	return &Handler{
 		Db:            db,
 		ErrorLog:      errorLog,
 		InfoLog:       infoLog,
 		R2Config:      r2Config,
 		CharacterRepo: characterRepo,
+		PackageRepo:   packageRepo,
 	}
 }
 
@@ -71,9 +74,17 @@ func (h *Handler) GetCharacters() http.HandlerFunc {
 
 func (h *Handler) GetPackages() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		result, err := h.PackageRepo.Get()
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving packages")
+		}
+		jsonResult, err := json.Marshal(result)
+		if err != nil {
+			h.ErrorLog.Print("Error marshaling packages")
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"packages": [{"name": "Package 1", "price": 30}, {"name": "Package 2", "price": 25}]}`))
+		w.Write(jsonResult)
 	}
 }
 
