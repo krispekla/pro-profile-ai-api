@@ -28,9 +28,11 @@ func NewPackageRepositoryImpl(db *sql.DB) *PackageRepositoryImpl {
 func (r *PackageRepositoryImpl) GetListing() (*[]types.PackageListingDTO, error) {
 	stmt := SELECT(
 		Package.AllColumns,
-	).FROM(Package)
+		PackagePrice.AllColumns,
+	).FROM(Package.FULL_JOIN(PackagePrice, PackagePrice.PackageID.EQ(Package.ID)))
 
-	var result []model.Package
+	var result []types.PackageListingDTO
+
 	err := stmt.Query(r.Db, &result)
 	if err != nil {
 		return nil, errors.New("error retrieving packages")
