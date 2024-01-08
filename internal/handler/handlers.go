@@ -27,11 +27,13 @@ type Handler struct {
 	R2Config      *aws.Config
 	CharacterRepo *repository.CharacterRepositoryImpl
 	PackageRepo   *repository.PackageRepositoryImpl
+	OrderRepo     *repository.OrderRepositoryImpl
 }
 
 func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config *aws.Config) *Handler {
 	characterRepo := repository.NewCharacterRepositoryImpl(db)
 	packageRepo := repository.NewPackageRepositoryImpl(db)
+	orderRepo := repository.NewOrderRepositoryImpl(db)
 	return &Handler{
 		Db:            db,
 		ErrorLog:      errorLog,
@@ -39,6 +41,7 @@ func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config 
 		R2Config:      r2Config,
 		CharacterRepo: characterRepo,
 		PackageRepo:   packageRepo,
+		OrderRepo:     orderRepo,
 	}
 }
 
@@ -75,6 +78,27 @@ func (h *Handler) GetCharacters() http.HandlerFunc {
 func (h *Handler) GetPackageListing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		result, err := h.PackageRepo.GetListing()
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving packages")
+		}
+		jsonResult, err := json.Marshal(result)
+		if err != nil {
+			h.ErrorLog.Print("Error marshaling packages")
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResult)
+	}
+}
+
+func (h *Handler) GetAllOrders() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
+		usrId, err := uuid.Parse(usr.Id)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
+		}
+		result, err := h.OrderRepo.GetAllOrders(usrId)
 		if err != nil {
 			h.ErrorLog.Print("Error retrieving packages")
 		}
