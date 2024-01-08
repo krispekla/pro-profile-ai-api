@@ -21,7 +21,7 @@ func routes(app *Application) *chi.Mux {
 		// r.Get("/test", hls.GetPackages123())
 		r.Get("/characters", hls.GetCharacters())
 		r.Post("/characters", hls.CreateCharacter())
-		r.Get("/packages", hls.GetPackages())
+		r.Get("/packages/listing", hls.GetPackageListing())
 		r.Get("/packages/:id", hls.GetPackageDetails())
 		r.Post("/packages/buy", hls.BuyPackage())
 		r.Post("/checkout/sessions", hls.CreateCheckoutSession())

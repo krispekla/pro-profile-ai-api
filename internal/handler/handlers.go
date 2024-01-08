@@ -72,9 +72,9 @@ func (h *Handler) GetCharacters() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) GetPackages() http.HandlerFunc {
+func (h *Handler) GetPackageListing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		result, err := h.PackageRepo.Get()
+		result, err := h.PackageRepo.GetListing()
 		if err != nil {
 			h.ErrorLog.Print("Error retrieving packages")
 		}

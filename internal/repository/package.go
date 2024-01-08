@@ -7,6 +7,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
 	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
+	"github.com/krispekla/pro-profile-ai-api/types"
 	_ "github.com/lib/pq"
 )
 
@@ -24,7 +25,7 @@ func NewPackageRepositoryImpl(db *sql.DB) *PackageRepositoryImpl {
 	}
 }
 
-func (r *PackageRepositoryImpl) Get() (*[]model.Package, error) {
+func (r *PackageRepositoryImpl) GetListing() (*[]types.PackageListingDTO, error) {
 	stmt := SELECT(
 		Package.AllColumns,
 	).FROM(Package)
