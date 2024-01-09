@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
 	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
 	"github.com/krispekla/pro-profile-ai-api/types"
@@ -12,7 +13,8 @@ import (
 )
 
 type PackageRepository interface {
-	Get() (*[]model.Package, error)
+	GetListing() (*[]model.Package, error)
+	GetGeneratedByUser(usrId uuid.UUID) (*[]types.PackageGeneratedDTO, error)
 }
 
 type PackageRepositoryImpl struct {
