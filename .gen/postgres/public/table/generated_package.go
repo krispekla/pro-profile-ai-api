@@ -20,8 +20,10 @@ type generatedPackageTable struct {
 	ID                 postgres.ColumnInteger
 	PackageOrderItemID postgres.ColumnInteger
 	CharacterID        postgres.ColumnInteger
+	Status             postgres.ColumnString
 	CoverImgURL        postgres.ColumnString
 	Created            postgres.ColumnTimestamp
+	Updated            postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,10 +67,12 @@ func newGeneratedPackageTableImpl(schemaName, tableName, alias string) generated
 		IDColumn                 = postgres.IntegerColumn("id")
 		PackageOrderItemIDColumn = postgres.IntegerColumn("package_order_item_id")
 		CharacterIDColumn        = postgres.IntegerColumn("character_id")
+		StatusColumn             = postgres.StringColumn("status")
 		CoverImgURLColumn        = postgres.StringColumn("cover_img_url")
 		CreatedColumn            = postgres.TimestampColumn("created")
-		allColumns               = postgres.ColumnList{IDColumn, PackageOrderItemIDColumn, CharacterIDColumn, CoverImgURLColumn, CreatedColumn}
-		mutableColumns           = postgres.ColumnList{PackageOrderItemIDColumn, CharacterIDColumn, CoverImgURLColumn, CreatedColumn}
+		UpdatedColumn            = postgres.TimestampColumn("updated")
+		allColumns               = postgres.ColumnList{IDColumn, PackageOrderItemIDColumn, CharacterIDColumn, StatusColumn, CoverImgURLColumn, CreatedColumn, UpdatedColumn}
+		mutableColumns           = postgres.ColumnList{PackageOrderItemIDColumn, CharacterIDColumn, StatusColumn, CoverImgURLColumn, CreatedColumn, UpdatedColumn}
 	)
 
 	return generatedPackageTable{
@@ -78,8 +82,10 @@ func newGeneratedPackageTableImpl(schemaName, tableName, alias string) generated
 		ID:                 IDColumn,
 		PackageOrderItemID: PackageOrderItemIDColumn,
 		CharacterID:        CharacterIDColumn,
+		Status:             StatusColumn,
 		CoverImgURL:        CoverImgURLColumn,
 		Created:            CreatedColumn,
+		Updated:            UpdatedColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

@@ -14,7 +14,9 @@ import (
 type GeneratedPackage struct {
 	ID                 int32 `sql:"primary_key"`
 	PackageOrderItemID int32
-	CharacterID        int32
-	CoverImgURL        string
+	CharacterID        *int32
+	Status             GeneratedPackageStatus
+	CoverImgURL        *string
 	Created            time.Time
+	Updated            time.Time
 }
