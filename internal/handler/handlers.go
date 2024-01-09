@@ -98,7 +98,7 @@ func (h *Handler) GetGeneratedPackages() http.HandlerFunc {
 		if err != nil {
 			h.ErrorLog.Print("Error parsing uuid")
 		}
-		result, err := h.PackageRepo.GetGeneratedByUser(usrId)
+		result, err := h.PackageRepo.GetGeneratedPackages(usrId)
 		if err != nil {
 			h.ErrorLog.Print("Error retrieving packages")
 		}

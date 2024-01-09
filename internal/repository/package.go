@@ -14,7 +14,7 @@ import (
 
 type PackageRepository interface {
 	GetListing() (*[]model.Package, error)
-	GetGeneratedByUser(usrId uuid.UUID) (*[]types.PackageGeneratedDTO, error)
+	GetGeneratedPackages(usrId uuid.UUID) (*[]types.PackageGeneratedDTO, error)
 }
 
 type PackageRepositoryImpl struct {
@@ -34,6 +34,25 @@ func (r *PackageRepositoryImpl) GetListing() (*[]types.PackageListingDTO, error)
 	).FROM(Package.FULL_JOIN(PackagePrice, PackagePrice.PackageID.EQ(Package.ID)))
 
 	var result []types.PackageListingDTO
+
+	err := stmt.Query(r.Db, &result)
+	if err != nil {
+		return nil, errors.New("error retrieving packages")
+	}
+	return &result, nil
+}
+
+func (r *PackageRepositoryImpl) GetGeneratedPackages(usrId uuid.UUID) (*[]types.PackageGeneratedDTO, error) {
+	stmt := SELECT(
+		GeneratedPackage.AllColumns,
+		PackageOrderItem.PackageID,
+	).FROM(
+		GeneratedPackage.LEFT_JOIN(PackageOrderItem, PackageOrderItem.ID.EQ(GeneratedPackage.PackageOrderItemID)).LEFT_JOIN(PackageOrder, PackageOrder.ID.EQ(PackageOrderItem.PackageOrderID)),
+	).WHERE(
+		PackageOrder.UserID.EQ(UUID(usrId)),
+	)
+
+	var result []types.PackageGeneratedDTO
 
 	err := stmt.Query(r.Db, &result)
 	if err != nil {
