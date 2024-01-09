@@ -91,6 +91,27 @@ func (h *Handler) GetPackageListing() http.HandlerFunc {
 	}
 }
 
+func (h *Handler) GetGeneratedPackages() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
+		usrId, err := uuid.Parse(usr.Id)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
+		}
+		result, err := h.PackageRepo.GetGeneratedByUser(usrId)
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving packages")
+		}
+		jsonResult, err := json.Marshal(result)
+		if err != nil {
+			h.ErrorLog.Print("Error marshaling packages")
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResult)
+	}
+}
+
 func (h *Handler) GetAllOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
