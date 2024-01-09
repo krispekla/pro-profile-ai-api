@@ -592,18 +592,32 @@ VALUES (
 INSERT INTO generated_package (
         package_order_item_id,
         character_id,
-        cover_img_url
+        cover_img_url,
+        status
     )
 VALUES (
         2,
         1,
-        'https://images.generated.photos/xvMS54uAAXqqavBGe82066GDFqKjkW0TgdA18kpNlEg/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92M18w/OTE0MzI0LmpwZw.jpg'
+        'https://images.generated.photos/xvMS54uAAXqqavBGe82066GDFqKjkW0TgdA18kpNlEg/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92M18w/OTE0MzI0LmpwZw.jpg',
+        'processing'
+    ),
+    (
+        2,
+        1,
+        'https://images.generated.photos/xvMS54uAAXqqavBGe82066GDFqKjkW0TgdA18kpNlEg/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92M18w/OTE0MzI0LmpwZw.jpg',
+        'generated'
     ),
     (
         3,
         1,
-        'https://images.ladbible.com/resize?type=jpeg&quality=70&width=648&fit=contain&gravity=null&url=https://s3-images.ladbible.com/s3/content/0c6495f0618693f2e69c848f47eba104.jpg'
+        'https://images.ladbible.com/resize?type=jpeg&quality=70&width=648&fit=contain&gravity=null&url=https://s3-images.ladbible.com/s3/content/0c6495f0618693f2e69c848f47eba104.jpg',
+        'generated'
     );
+INSERT INTO generated_package (package_order_item_id)
+VALUES (1),
+    (4),
+    (5),
+    (6);
 INSERT INTO generated_package_img (generated_package_id, img_url, model_id)
 VALUES (
         1,

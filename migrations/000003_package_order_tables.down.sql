@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS generated_package_img;
 DROP TABLE IF EXISTS generated_package;
+DROP TYPE IF EXISTS generated_package_status;
 DROP TABLE IF EXISTS package_order_item;
 DROP TABLE IF EXISTS package_order;
 DROP TYPE IF EXISTS order_status;

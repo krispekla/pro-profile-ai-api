@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS package_order (
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total_amount INT NOT NULL,
     currency TEXT NOT NULL,
-    status order_status NOT NULL,
+    status order_status NOT NULL DEFAULT 'created',
     coupon_id INT REFERENCES coupon (id)
 );
 CREATE TABLE IF NOT EXISTS package_order_item (
@@ -66,12 +66,26 @@ CREATE TABLE IF NOT EXISTS package_order_item (
     package_id INT REFERENCES package (id) NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'generated_package_status'
+) THEN CREATE TYPE generated_package_status AS ENUM (
+    'created',
+    'processing',
+    'generated'
+);
+END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS generated_package (
     id SERIAL PRIMARY KEY,
     package_order_item_id INT REFERENCES package_order_item (id) NOT NULL,
-    character_id INT REFERENCES character (id) NOT NULL,
-    cover_img_url TEXT NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    character_id INT REFERENCES character (id),
+    status generated_package_status NOT NULL DEFAULT 'created', 
+    cover_img_url TEXT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS generated_package_img (
     id SERIAL PRIMARY KEY,
