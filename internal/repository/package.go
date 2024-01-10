@@ -6,14 +6,13 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
-	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
 	. "github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/table"
 	"github.com/krispekla/pro-profile-ai-api/types"
 	_ "github.com/lib/pq"
 )
 
 type PackageRepository interface {
-	GetListing() (*[]model.Package, error)
+	GetListing() (*[]types.PackageListingDTO, error)
 	GetGeneratedPackages(usrId uuid.UUID) (*[]types.PackageGeneratedDTO, error)
 }
 
@@ -31,7 +30,8 @@ func (r *PackageRepositoryImpl) GetListing() (*[]types.PackageListingDTO, error)
 	stmt := SELECT(
 		Package.AllColumns,
 		PackagePrice.AllColumns,
-	).FROM(Package.FULL_JOIN(PackagePrice, PackagePrice.PackageID.EQ(Package.ID)))
+		PackageExampleImg.AllColumns.Except(PackageExampleImg.PackageID, PackageExampleImg.ID),
+	).FROM(Package.LEFT_JOIN(PackagePrice, PackagePrice.PackageID.EQ(Package.ID)).LEFT_JOIN(PackageExampleImg, Package.ID.EQ(PackageExampleImg.PackageID)))
 
 	var result []types.PackageListingDTO
 
