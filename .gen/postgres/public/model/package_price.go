@@ -8,8 +8,9 @@
 package model
 
 type PackagePrice struct {
-	ID        int32 `sql:"primary_key"`
-	PackageID int32
-	Amount    int32
-	Currency  string
+	ID              int32 `sql:"primary_key"`
+	PackageID       int32
+	Amount          int32
+	Currency        string
+	StripeProductID *string
 }

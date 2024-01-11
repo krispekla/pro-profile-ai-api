@@ -17,10 +17,11 @@ type packagePriceTable struct {
 	postgres.Table
 
 	// Columns
-	ID        postgres.ColumnInteger
-	PackageID postgres.ColumnInteger
-	Amount    postgres.ColumnInteger
-	Currency  postgres.ColumnString
+	ID              postgres.ColumnInteger
+	PackageID       postgres.ColumnInteger
+	Amount          postgres.ColumnInteger
+	Currency        postgres.ColumnString
+	StripeProductID postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -61,22 +62,24 @@ func newPackagePriceTable(schemaName, tableName, alias string) *PackagePriceTabl
 
 func newPackagePriceTableImpl(schemaName, tableName, alias string) packagePriceTable {
 	var (
-		IDColumn        = postgres.IntegerColumn("id")
-		PackageIDColumn = postgres.IntegerColumn("package_id")
-		AmountColumn    = postgres.IntegerColumn("amount")
-		CurrencyColumn  = postgres.StringColumn("currency")
-		allColumns      = postgres.ColumnList{IDColumn, PackageIDColumn, AmountColumn, CurrencyColumn}
-		mutableColumns  = postgres.ColumnList{PackageIDColumn, AmountColumn, CurrencyColumn}
+		IDColumn              = postgres.IntegerColumn("id")
+		PackageIDColumn       = postgres.IntegerColumn("package_id")
+		AmountColumn          = postgres.IntegerColumn("amount")
+		CurrencyColumn        = postgres.StringColumn("currency")
+		StripeProductIDColumn = postgres.StringColumn("stripe_product_id")
+		allColumns            = postgres.ColumnList{IDColumn, PackageIDColumn, AmountColumn, CurrencyColumn, StripeProductIDColumn}
+		mutableColumns        = postgres.ColumnList{PackageIDColumn, AmountColumn, CurrencyColumn, StripeProductIDColumn}
 	)
 
 	return packagePriceTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:        IDColumn,
-		PackageID: PackageIDColumn,
-		Amount:    AmountColumn,
-		Currency:  CurrencyColumn,
+		ID:              IDColumn,
+		PackageID:       PackageIDColumn,
+		Amount:          AmountColumn,
+		Currency:        CurrencyColumn,
+		StripeProductID: StripeProductIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
