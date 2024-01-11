@@ -100,7 +100,7 @@ migrate/force:
 ## seed: seed database with test data
 .PHONY: seed
 seed:
-	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./internal/database/migrations/seed_fake.sql
+	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./internal/database/seed_fake.sql
 
 ## generate: generate code from database schema
 .PHONY: generate
