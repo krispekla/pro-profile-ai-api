@@ -124,7 +124,7 @@ VALUES (
         'This Instagram package generates AI images optimized for social media sharing. Boost your Instagram profile with high-quality, AI-generated images that resonate with the Instagram community.',
         'https://images.ladbible.com/resize?type=jpeg&quality=70&width=648&fit=contain&gravity=null&url=https://s3-images.ladbible.com/s3/content/0c6495f0618693f2e69c848f47eba104.jpg'
     );
-INSERT INTO package_price (package_id, amount, currency)
+INSERT INTO package_price (package_id, amount, currency, stripe_product_id)
 VALUES (
         (
             SELECT id
@@ -132,7 +132,8 @@ VALUES (
             WHERE name = 'Linkedin package'
         ),
         20,
-        'USD'
+        'USD',
+        'price_1OXMWLFSEa3MNRY9UD2qBbd0'
     ),
     (
         (
@@ -141,7 +142,8 @@ VALUES (
             WHERE name = 'Christmas package'
         ),
         20,
-        'USD'
+        'USD',
+        'price_1OXMYbFSEa3MNRY94mt3xKhR'
     ),
     (
         (
@@ -150,7 +152,8 @@ VALUES (
             WHERE name = 'Instagram package'
         ),
         49,
-        'USD'
+        'USD',
+        'price_1OXMXHFSEa3MNRY9y23Xz2DT'
     );
 INSERT INTO coupon (package_id, code, amount, currency, percentage)
 VALUES (
