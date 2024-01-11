@@ -7,13 +7,15 @@ import (
 )
 
 type PackageListingDTO struct {
-	ID          int32                      `sql:"primary_key" alias:"package.id"`
-	Name        string                     `alias:"package.name"`
-	Description string                     `alias:"package.description"`
-	CoverImgURL string                     `alias:"package.cover_img_url"`
-	Created     time.Time                  `alias:"package.created"`
-	Pricing     *[]model.PackagePrice      `alias:"package_price"`
-	Imgs        *[]struct{ ImgURL string } `alias:"package_example_img"`
+	ID          int32                 `sql:"primary_key" alias:"package.id" json:"id"`
+	Name        string                `alias:"package.name" json:"name"`
+	Description string                `alias:"package.description" json:"description"`
+	CoverImgURL string                `alias:"package.cover_img_url" json:"cover_img_url"`
+	Created     time.Time             `alias:"package.created" json:"created"`
+	Pricing     *[]model.PackagePrice `alias:"package_price" json:"pricing"`
+	Imgs        *[]struct {
+		ImgURL string `alias:"package_example_img.img_url" json:"url"`
+	} `alias:"package_example_img" json:"imgs"`
 }
 
 type PackageGeneratedDTO struct {
