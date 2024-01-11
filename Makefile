@@ -69,7 +69,7 @@ run/live:
 ## migrate/create: create new migration
 ## Usage: make migrate/create name="your_migration_name_here"
 migrate/create:
-	migrate create -ext sql -dir ./migrations -seq $(name)
+	migrate create -ext sql -dir ./internal/database/migrations -seq $(name)
 
 ## migrate/up: run up migration
 .PHONY: migrate/up
@@ -100,7 +100,7 @@ migrate/force:
 ## seed: seed database with test data
 .PHONY: seed
 seed:
-	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./migrations/seed_fake.sql
+	 PGPASSWORD=$$PPAI_API_DB_PASSWORD	psql -h $$PPAI_API_DB_HOST -p $$PPAI_API_DB_PORT -U $$PPAI_API_DB_USER -d $$PPAI_API_DB_NAME -f ./internal/database/migrations/seed_fake.sql
 
 ## generate: generate code from database schema
 .PHONY: generate
