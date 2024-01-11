@@ -74,28 +74,28 @@ migrate/create:
 ## migrate/up: run up migration
 .PHONY: migrate/up
 migrate/up:
-	migrate -path ./migrations -database "$(db_con)" up $(n)
+	migrate -path ./internal/database/migrations -database "$(db_con)" up $(n)
 
 ## migrate/down: run down migration
 .PHONY: migrate/down
 migrate/down:
-	migrate -path ./migrations -database "$(db_con)" down $(n)
+	migrate -path ./internal/database/migrations -database "$(db_con)" down $(n)
     # Command to rollback migrations
 
 ## migrate/print: print migrate version
 .PHONY: migrate/print
 migrate/print:
-	migrate -path ./migrations -database "$(db_con)" version
+	migrate -path ./internal/database/migrations -database "$(db_con)" version
 
 ## migrate/go: run migration to version
 .PHONY: migrate/go
 migrate/go:
-	migrate -path ./migrations -database "$(db_con)" goto $(v)
+	migrate -path ./internal/database/migrations -database "$(db_con)" goto $(v)
 
 ## migrate/force: force migrate to version
 .PHONY: migrate/force
 migrate/force:
-	migrate -path ./migrations -database "$(db_con)" force $(v)
+	migrate -path ./internal/database/migrations -database "$(db_con)" force $(v)
 
 ## seed: seed database with test data
 .PHONY: seed
