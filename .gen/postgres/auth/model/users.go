@@ -48,4 +48,6 @@ type Users struct {
 	IsSsoUser                bool
 	DeletedAt                *time.Time
 	StripeCustomerID         *string
+	FirstName                *string
+	LastName                 *string
 }
