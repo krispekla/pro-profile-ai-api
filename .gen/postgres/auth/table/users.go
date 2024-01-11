@@ -51,6 +51,7 @@ type usersTable struct {
 	ReauthenticationSentAt   postgres.ColumnTimestampz
 	IsSsoUser                postgres.ColumnBool
 	DeletedAt                postgres.ColumnTimestampz
+	StripeCustomerID         postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -125,8 +126,9 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		ReauthenticationSentAtColumn   = postgres.TimestampzColumn("reauthentication_sent_at")
 		IsSsoUserColumn                = postgres.BoolColumn("is_sso_user")
 		DeletedAtColumn                = postgres.TimestampzColumn("deleted_at")
-		allColumns                     = postgres.ColumnList{InstanceIDColumn, IDColumn, AudColumn, RoleColumn, EmailColumn, EncryptedPasswordColumn, EmailConfirmedAtColumn, InvitedAtColumn, ConfirmationTokenColumn, ConfirmationSentAtColumn, RecoveryTokenColumn, RecoverySentAtColumn, EmailChangeTokenNewColumn, EmailChangeColumn, EmailChangeSentAtColumn, LastSignInAtColumn, RawAppMetaDataColumn, RawUserMetaDataColumn, IsSuperAdminColumn, CreatedAtColumn, UpdatedAtColumn, PhoneColumn, PhoneConfirmedAtColumn, PhoneChangeColumn, PhoneChangeTokenColumn, PhoneChangeSentAtColumn, ConfirmedAtColumn, EmailChangeTokenCurrentColumn, EmailChangeConfirmStatusColumn, BannedUntilColumn, ReauthenticationTokenColumn, ReauthenticationSentAtColumn, IsSsoUserColumn, DeletedAtColumn}
-		mutableColumns                 = postgres.ColumnList{InstanceIDColumn, AudColumn, RoleColumn, EmailColumn, EncryptedPasswordColumn, EmailConfirmedAtColumn, InvitedAtColumn, ConfirmationTokenColumn, ConfirmationSentAtColumn, RecoveryTokenColumn, RecoverySentAtColumn, EmailChangeTokenNewColumn, EmailChangeColumn, EmailChangeSentAtColumn, LastSignInAtColumn, RawAppMetaDataColumn, RawUserMetaDataColumn, IsSuperAdminColumn, CreatedAtColumn, UpdatedAtColumn, PhoneColumn, PhoneConfirmedAtColumn, PhoneChangeColumn, PhoneChangeTokenColumn, PhoneChangeSentAtColumn, EmailChangeTokenCurrentColumn, EmailChangeConfirmStatusColumn, BannedUntilColumn, ReauthenticationTokenColumn, ReauthenticationSentAtColumn, IsSsoUserColumn, DeletedAtColumn}
+		StripeCustomerIDColumn         = postgres.StringColumn("stripe_customer_id")
+		allColumns                     = postgres.ColumnList{InstanceIDColumn, IDColumn, AudColumn, RoleColumn, EmailColumn, EncryptedPasswordColumn, EmailConfirmedAtColumn, InvitedAtColumn, ConfirmationTokenColumn, ConfirmationSentAtColumn, RecoveryTokenColumn, RecoverySentAtColumn, EmailChangeTokenNewColumn, EmailChangeColumn, EmailChangeSentAtColumn, LastSignInAtColumn, RawAppMetaDataColumn, RawUserMetaDataColumn, IsSuperAdminColumn, CreatedAtColumn, UpdatedAtColumn, PhoneColumn, PhoneConfirmedAtColumn, PhoneChangeColumn, PhoneChangeTokenColumn, PhoneChangeSentAtColumn, ConfirmedAtColumn, EmailChangeTokenCurrentColumn, EmailChangeConfirmStatusColumn, BannedUntilColumn, ReauthenticationTokenColumn, ReauthenticationSentAtColumn, IsSsoUserColumn, DeletedAtColumn, StripeCustomerIDColumn}
+		mutableColumns                 = postgres.ColumnList{InstanceIDColumn, AudColumn, RoleColumn, EmailColumn, EncryptedPasswordColumn, EmailConfirmedAtColumn, InvitedAtColumn, ConfirmationTokenColumn, ConfirmationSentAtColumn, RecoveryTokenColumn, RecoverySentAtColumn, EmailChangeTokenNewColumn, EmailChangeColumn, EmailChangeSentAtColumn, LastSignInAtColumn, RawAppMetaDataColumn, RawUserMetaDataColumn, IsSuperAdminColumn, CreatedAtColumn, UpdatedAtColumn, PhoneColumn, PhoneConfirmedAtColumn, PhoneChangeColumn, PhoneChangeTokenColumn, PhoneChangeSentAtColumn, EmailChangeTokenCurrentColumn, EmailChangeConfirmStatusColumn, BannedUntilColumn, ReauthenticationTokenColumn, ReauthenticationSentAtColumn, IsSsoUserColumn, DeletedAtColumn, StripeCustomerIDColumn}
 	)
 
 	return usersTable{
@@ -167,6 +169,7 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		ReauthenticationSentAt:   ReauthenticationSentAtColumn,
 		IsSsoUser:                IsSsoUserColumn,
 		DeletedAt:                DeletedAtColumn,
+		StripeCustomerID:         StripeCustomerIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

@@ -47,4 +47,5 @@ type Users struct {
 	ReauthenticationSentAt   *time.Time
 	IsSsoUser                bool
 	DeletedAt                *time.Time
+	StripeCustomerID         *string
 }
