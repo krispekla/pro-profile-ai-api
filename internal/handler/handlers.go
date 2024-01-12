@@ -28,12 +28,14 @@ type Handler struct {
 	CharacterRepo *repository.CharacterRepositoryImpl
 	PackageRepo   *repository.PackageRepositoryImpl
 	OrderRepo     *repository.OrderRepositoryImpl
+	UserRepo      *repository.UserRepositoryImpl
 }
 
 func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config *aws.Config) *Handler {
 	characterRepo := repository.NewCharacterRepositoryImpl(db)
 	packageRepo := repository.NewPackageRepositoryImpl(db)
 	orderRepo := repository.NewOrderRepositoryImpl(db)
+	userRepo := repository.NewUserRepositoryImpl(db)
 	return &Handler{
 		Db:            db,
 		ErrorLog:      errorLog,
@@ -42,8 +44,11 @@ func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config 
 		CharacterRepo: characterRepo,
 		PackageRepo:   packageRepo,
 		OrderRepo:     orderRepo,
+		UserRepo:      userRepo,
 	}
 }
+
+// TODO: For all errors return appropriate client status and message
 
 func (h *Handler) UserDetails() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
