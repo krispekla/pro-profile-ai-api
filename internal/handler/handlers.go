@@ -11,7 +11,6 @@ import (
 	"github.com/krispekla/pro-profile-ai-api/internal/repository"
 	"github.com/krispekla/pro-profile-ai-api/internal/services"
 	"github.com/krispekla/pro-profile-ai-api/types"
-	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
 /*
@@ -242,7 +241,12 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 
 func (h *Handler) RetrieveCheckoutSession() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		s, _ := session.Get(r.URL.Query().Get("session_id"), nil)
+		sessionId := r.URL.Query().Get("session_id")
+		s, err := services.GetStripeSession(sessionId)
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving checkout session")
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"message": "Checkout session retrieved", "status": "` + string(s.Status) + `", "customerEmail": "` + string(s.CustomerDetails.Email) + `"}`))

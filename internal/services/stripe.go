@@ -59,3 +59,8 @@ func CreateCustomer(inp *CreateCustomerInput) (*stripe.Customer, error) {
 	result, err := customer.New(params)
 	return result, err
 }
+
+func GetStripeSession(id string) (*stripe.CheckoutSession, error) {
+	s, err := session.Get(id, nil)
+	return s, err
+}
