@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/uuid"
 	"github.com/krispekla/pro-profile-ai-api/internal/repository"
+	"github.com/krispekla/pro-profile-ai-api/internal/services"
 	"github.com/krispekla/pro-profile-ai-api/types"
-	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
@@ -162,27 +162,77 @@ func (h *Handler) CreateCharacter() http.HandlerFunc {
 	}
 }
 
+type CreateCheckoutSessionBody struct {
+	ProductIds *[]string `json:"productIds"`
+}
+
 func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		domain := "http://localhost:5173"
-		params := &stripe.CheckoutSessionParams{
-			UIMode:    stripe.String("embedded"),
-			ReturnURL: stripe.String(domain + "/package/buy/return?session_id={CHECKOUT_SESSION_ID}"),
-			LineItems: []*stripe.CheckoutSessionLineItemParams{
-				&stripe.CheckoutSessionLineItemParams{
-					// TODO: Product id from stripe dashboard, adjust for production
-					Price:    stripe.String("price_1OITFBFSEa3MNRY9u9T0IOy6"),
-					Quantity: stripe.Int64(1),
-				},
-			},
-			Mode:         stripe.String(string(stripe.CheckoutSessionModePayment)),
-			AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{Enabled: stripe.Bool(true)},
+		var body CreateCheckoutSessionBody
+		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			h.ErrorLog.Print("Error decoding checkout body")
+			return
 		}
-
-		s, err := session.New(params)
+		if body.ProductIds == nil || len(*body.ProductIds) == 0 {
+			h.ErrorLog.Print("ProductIds are required")
+			return
+		}
+		// Check if customer for user exist in stripe
+		usrCtxId := r.Context().Value(types.UserContextKey).(*types.JwtUser)
+		usrId, err := uuid.Parse(usrCtxId.Id)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
+			return
+		}
+		usr, err := h.UserRepo.Get(usrId)
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving user")
+			return
+		}
+		var customerId string
+		if usr.StripeCustomerID == nil || *usr.StripeCustomerID == "" {
+			fullName := ""
+			if usr.FirstName != nil {
+				fullName = *usr.FirstName
+			}
+			if usr.LastName != nil {
+				if fullName != "" {
+					fullName += " "
+				}
+				fullName += *usr.LastName
+			}
+			if usrCtxId.Email == "" {
+				h.ErrorLog.Print("Error retrieving user email")
+				return
+			}
+			// Create customer
+			customerInput := &services.CreateCustomerInput{
+				UserId:   usrCtxId.Id,
+				Email:    *usr.Email,
+				FullName: fullName,
+			}
+			cstmr, err := services.CreateCustomer(customerInput)
+			if err != nil {
+				h.ErrorLog.Print("Error creating customer")
+				return
+			}
+			customerId = cstmr.ID
+			err = h.UserRepo.UpdateCustomerDetails(&repository.UserCustomerInput{Id: usrId, StripeCustomerID: customerId})
+			if err != nil {
+				h.ErrorLog.Print("Error updating user with customer details")
+				return
+			}
+		} else {
+			customerId = *usr.StripeCustomerID
+		}
+		// Get price id from request
+		checkoutParam := &services.CreateCheckoutSessionInput{ProductIds: body.ProductIds, CustomerId: customerId}
+		s, err := services.CreateCheckoutSession(checkoutParam)
 
 		if err != nil {
 			h.ErrorLog.Print("Error creating checkout session")
+			return
 		}
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
