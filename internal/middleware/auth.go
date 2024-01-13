@@ -24,9 +24,13 @@ func NewMiddleware(jwtSecret string, infoLog *log.Logger) *Middleware {
 	}
 }
 
-func (app *Middleware) AuthMiddleware() func(next http.Handler) http.Handler {
+func (app *Middleware) AuthMiddleware(pubRoutes map[string]struct{}) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if _, ok := pubRoutes[r.URL.Path]; ok {
+				next.ServeHTTP(w, r)
+				return
+			}
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				handler.ClientError(w, http.StatusUnauthorized)
