@@ -3,8 +3,11 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/uuid"
@@ -250,6 +253,25 @@ func (h *Handler) RetrieveCheckoutSession() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"message": "Checkout session retrieved", "status": "` + string(s.Status) + `", "customerEmail": "` + string(s.CustomerDetails.Email) + `"}`))
+	}
+}
+func (h *Handler) StripeWebhookHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const MaxBodyBytes = int64(65536)
+		r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
+		payload, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+
+		stripeSign := r.Header.Get("Stripe-Signature")
+		status, err := services.ProcceesStripeWebhook(payload, stripeSign)
+		if err != nil {
+			h.ErrorLog.Print(err)
+		}
+		w.WriteHeader(status)
 	}
 }
 

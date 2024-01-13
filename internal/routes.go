@@ -28,6 +28,7 @@ func routes(app *Application) *chi.Mux {
 		r.Get("/order/all", hls.GetAllOrders())
 		r.Post("/checkout/sessions", hls.CreateCheckoutSession())
 		r.Get("/checkout/sessions", hls.RetrieveCheckoutSession())
+		r.Post("/payment/webhook", hls.StripeWebhookHandler())
 		// r.Get("/buckets/all", handlers.GetAllBuckets())
 		// r.Get("/image/presigned", handlers.GetPresignedImgUrl())
 	})
