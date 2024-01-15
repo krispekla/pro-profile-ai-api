@@ -242,6 +242,23 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 			h.ErrorLog.Print("Error retrieving package prices")
 			return
 		}
+
+		// TODO: Create package order with payment intent from created session
+		// s.PaymentIntent.
+		oi := &repository.CreateOrderInput{
+			PaymentIntentId: &s.PaymentIntent.ID,
+			Amount:          &s.PaymentIntent.Amount,
+			Currency:        string(s.PaymentIntent.Currency),
+			UserId:          &usrId,
+			PackagePrices:   pprices,
+		}
+
+		oCreated, err := h.OrderRepo.CreateOrder(oi)
+		if err != nil {
+			h.ErrorLog.Print("Error creating order")
+			return
+		}
+
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": "` + s.ClientSecret + `"}`))
