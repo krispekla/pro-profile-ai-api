@@ -261,7 +261,7 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": "` + s.ClientSecret + `"}`))
+		w.Write([]byte(`{"message": "Checkout session created", "clientSecret": "` + s.ClientSecret + `" , "orderId": "` + string(oCreated.ID) + `"}`))
 	}
 }
 
