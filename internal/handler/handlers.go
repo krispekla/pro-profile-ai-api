@@ -165,7 +165,7 @@ func (h *Handler) CreateCharacter() http.HandlerFunc {
 }
 
 type CreateCheckoutSessionBody struct {
-	ProductIds *[]string `json:"productIds"`
+	StripeProductIds *[]string `json:"productIds"`
 }
 
 func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
@@ -176,7 +176,7 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 			h.ErrorLog.Print("Error decoding checkout body")
 			return
 		}
-		if body.ProductIds == nil || len(*body.ProductIds) == 0 {
+		if body.StripeProductIds == nil || len(*body.StripeProductIds) == 0 {
 			h.ErrorLog.Print("ProductIds are required")
 			return
 		}
@@ -229,11 +229,17 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 			customerId = *usr.StripeCustomerID
 		}
 		// Get price id from request
-		checkoutParam := &services.CreateCheckoutSessionInput{ProductIds: body.ProductIds, CustomerId: customerId}
+		checkoutParam := &services.CreateCheckoutSessionInput{ProductIds: body.StripeProductIds, CustomerId: customerId}
 		s, err := services.CreateCheckoutSession(checkoutParam)
 
 		if err != nil {
 			h.ErrorLog.Print("Error creating checkout session")
+			return
+		}
+
+		pprices, err := h.PackageRepo.GetPackagePrice(body.StripeProductIds)
+		if err != nil {
+			h.ErrorLog.Print("Error retrieving package prices")
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
