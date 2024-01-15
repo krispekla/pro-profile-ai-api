@@ -180,7 +180,6 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 			h.ErrorLog.Print("ProductIds are required")
 			return
 		}
-		// Check if customer for user exist in stripe
 		usrCtxId := r.Context().Value(types.UserContextKey).(*types.JwtUser)
 		usrId, err := uuid.Parse(usrCtxId.Id)
 		if err != nil {
@@ -243,8 +242,6 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 			return
 		}
 
-		// TODO: Create package order with payment intent from created session
-		// s.PaymentIntent.
 		oi := &repository.CreateOrderInput{
 			PaymentIntentId: &s.PaymentIntent.ID,
 			Amount:          &s.PaymentIntent.Amount,
