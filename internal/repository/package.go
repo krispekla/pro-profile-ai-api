@@ -78,5 +78,16 @@ func (r *PackageRepositoryImpl) GetPackagePrice(productIds *[]string) (*[]model.
 	if err != nil {
 		return nil, errors.New("error retrieving packages")
 	}
-	return &result, nil
+
+	var filteredResult []model.PackagePrice
+
+	for _, productId := range *productIds {
+		for _, packagePrice := range result {
+			if *packagePrice.StripeProductID == productId {
+				filteredResult = append(filteredResult, packagePrice)
+			}
+		}
+	}
+
+	return &filteredResult, nil
 }
