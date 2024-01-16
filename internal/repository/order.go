@@ -57,11 +57,10 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 		PackageOrder.UserID,
 		PackageOrder.CouponID,
 	).VALUES(
-		*inp.PaymentIntentId,
-		*inp.Amount,
+		inp.PaymentIntentId,
+		inp.Amount,
 		inp.Currency,
-		*inp.UserId,
-		*inp.CouponId,
+		&inp.UserId,
 	).RETURNING(
 		PackageOrder.AllColumns,
 	)

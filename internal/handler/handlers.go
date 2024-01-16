@@ -243,9 +243,9 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 		}
 
 		oi := &repository.CreateOrderInput{
-			PaymentIntentId: &s.PaymentIntent.ID,
-			Amount:          &s.PaymentIntent.Amount,
-			Currency:        string(s.PaymentIntent.Currency),
+			PaymentIntentId: &s.ID,
+			Amount:          &s.AmountTotal,
+			Currency:        string(s.Currency),
 			UserId:          &usrId,
 			PackagePrices:   pprices,
 		}
