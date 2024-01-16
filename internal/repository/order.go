@@ -55,7 +55,6 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 		PackageOrder.TotalAmount,
 		PackageOrder.Currency,
 		PackageOrder.UserID,
-		PackageOrder.CouponID,
 	).VALUES(
 		inp.PaymentIntentId,
 		inp.Amount,
@@ -71,13 +70,13 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 		return nil, err
 	}
 
-	orderItems := make([]model.PackageOrderItem, len(*inp.PackagePrices))
+	var orderItems = &[]model.PackageOrderItem{}
 	totalPrice := int32(0)
-	for i, pprice := range *inp.PackagePrices {
-		orderItems[i] = model.PackageOrderItem{
+	for _, pprice := range *inp.PackagePrices {
+		*orderItems = append(*orderItems, model.PackageOrderItem{
 			PackageOrderID: newOrder.ID,
 			PackageID:      pprice.PackageID,
-		}
+		})
 		totalPrice += pprice.Amount
 	}
 	newOrder.TotalAmount = totalPrice
@@ -85,9 +84,9 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 	newOrderItemsStmt := PackageOrderItem.INSERT(
 		PackageOrderItem.PackageOrderID,
 		PackageOrderItem.PackageID,
-	).MODEL(&orderItems).RETURNING(PackageOrderItem.AllColumns)
+	).MODELS(orderItems).RETURNING(PackageOrderItem.AllColumns)
 
-	err = newOrderItemsStmt.Query(r.db, &orderItems)
+	_, err = newOrderItemsStmt.Exec(r.db)
 	if err != nil {
 		return nil, err
 	}
