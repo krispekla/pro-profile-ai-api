@@ -13,6 +13,7 @@ func routes(app *Application) *chi.Mux {
 	r := chi.NewRouter()
 	pubRoutes := map[string]struct{}{
 		"/api/payment/webhook": {},
+		"/api/user/webhook":    {},
 	}
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -21,6 +22,7 @@ func routes(app *Application) *chi.Mux {
 	r.Use(mdlw.AuthMiddleware(pubRoutes))
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/user", hls.UserDetails())
+		r.Post("/user/webhook", hls.UserRegistrationWebhook())
 		r.Get("/characters", hls.GetCharacters())
 		r.Post("/characters", hls.CreateCharacter())
 		r.Get("/packages/listing", hls.GetPackageListing())

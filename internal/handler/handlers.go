@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -56,6 +57,69 @@ func (h *Handler) UserDetails() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h.ErrorLog.Print("Unauthorized")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	}
+}
+
+type UserRow struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+type UserWebhookPayload struct {
+	Type   string  `json:"type"`
+	Table  string  `json:"table"`
+	Record UserRow `json:"record"`
+}
+
+func (h *Handler) UserRegistrationWebhook() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const MaxBodyBytes = int64(65536)
+		r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
+		payload, err := io.ReadAll(r.Body)
+		if err != nil {
+			h.ErrorLog.Print("Error reading request body")
+			return
+		}
+		var data UserWebhookPayload
+		err = json.Unmarshal(payload, &data)
+		if err != nil {
+			h.ErrorLog.Print("Error unmarshaling request body")
+			return
+		}
+		// Create Stripe customer for user
+		usrId, err := uuid.Parse(data.Record.ID)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
+			return
+		}
+		fullName := ""
+		if data.Record.FirstName != "" {
+			fullName = data.Record.FirstName
+		}
+		if data.Record.LastName != "" {
+			if fullName != "" {
+				fullName += " "
+			}
+			fullName += data.Record.LastName
+		}
+		customerInput := &services.CreateCustomerInput{
+			UserId:   data.Record.ID,
+			Email:    data.Record.Email,
+			FullName: fullName,
+		}
+		cstmr, err := services.CreateCustomer(customerInput)
+		if err != nil {
+			h.ErrorLog.Print("Error creating customer")
+			return
+		}
+		err = h.UserRepo.UpdateCustomerDetails(&repository.UserCustomerInput{Id: usrId, StripeCustomerID: cstmr.ID})
+		if err != nil {
+			h.ErrorLog.Print("Error updating user with customer details")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
