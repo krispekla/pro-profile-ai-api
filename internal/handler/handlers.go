@@ -31,6 +31,7 @@ type Handler struct {
 	PackageRepo   *repository.PackageRepositoryImpl
 	OrderRepo     *repository.OrderRepositoryImpl
 	UserRepo      *repository.UserRepositoryImpl
+	StripeSvc     *services.StripeServiceImpl
 }
 
 func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config *aws.Config) *Handler {
@@ -38,6 +39,7 @@ func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config 
 	packageRepo := repository.NewPackageRepositoryImpl(db)
 	orderRepo := repository.NewOrderRepositoryImpl(db)
 	userRepo := repository.NewUserRepositoryImpl(db)
+	stripeSvc := services.NewStripeServiceImpl(orderRepo)
 	return &Handler{
 		Db:            db,
 		ErrorLog:      errorLog,
@@ -47,6 +49,7 @@ func NewHandler(db *sql.DB, errorLog *log.Logger, infoLog *log.Logger, r2Config 
 		PackageRepo:   packageRepo,
 		OrderRepo:     orderRepo,
 		UserRepo:      userRepo,
+		StripeSvc:     stripeSvc,
 	}
 }
 
@@ -108,7 +111,7 @@ func (h *Handler) UserRegistrationWebhook() http.HandlerFunc {
 			Email:    data.Record.Email,
 			FullName: fullName,
 		}
-		cstmr, err := services.CreateCustomer(customerInput)
+		cstmr, err := h.StripeSvc.CreateCustomer(customerInput)
 		if err != nil {
 			h.ErrorLog.Print("Error creating customer")
 			return
@@ -276,7 +279,7 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 				Email:    *usr.Email,
 				FullName: fullName,
 			}
-			cstmr, err := services.CreateCustomer(customerInput)
+			cstmr, err := h.StripeSvc.CreateCustomer(customerInput)
 			if err != nil {
 				h.ErrorLog.Print("Error creating customer")
 				return
@@ -292,7 +295,7 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 		}
 		// Get price id from request
 		checkoutParam := &services.CreateCheckoutSessionInput{ProductIds: body.StripeProductIds, CustomerId: customerId}
-		s, err := services.CreateCheckoutSession(checkoutParam)
+		s, err := h.StripeSvc.CreateCheckoutSession(checkoutParam)
 
 		if err != nil {
 			h.ErrorLog.Print("Error creating checkout session")
@@ -328,7 +331,7 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 func (h *Handler) RetrieveCheckoutSession() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessionId := r.URL.Query().Get("session_id")
-		s, err := services.GetStripeSession(sessionId)
+		s, err := h.StripeSvc.GetStripeSession(sessionId)
 		if err != nil {
 			h.ErrorLog.Print("Error retrieving checkout session")
 			return
@@ -350,7 +353,7 @@ func (h *Handler) StripeWebhookHandler() http.HandlerFunc {
 		}
 
 		stripeSign := r.Header.Get("Stripe-Signature")
-		status, err := services.ProcceesStripeWebhook(payload, stripeSign)
+		status, err := h.StripeSvc.ProcceesStripeWebhook(payload, stripeSign)
 		if err != nil {
 			h.ErrorLog.Print(err)
 		}

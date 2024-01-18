@@ -7,17 +7,36 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/krispekla/pro-profile-ai-api/internal/repository"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/customer"
 )
+
+type StripeService interface {
+	CreateCheckoutSession(inp *CreateCheckoutSessionInput) (*stripe.CheckoutSession, error)
+	CreateCustomer(inp *CreateCustomerInput) (*stripe.Customer, error)
+	GetStripeSession(id string) (*stripe.CheckoutSession, error)
+	ProcceesStripeWebhook(payload []byte, reqSignature string) (int, error)
+}
+
+type StripeServiceImpl struct {
+	OrderRepo repository.OrderRepository
+}
+
+func NewStripeServiceImpl(orderRepo repository.OrderRepository) *StripeServiceImpl {
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	return &StripeServiceImpl{
+		OrderRepo: orderRepo,
+	}
+}
 
 type CreateCheckoutSessionInput struct {
 	ProductIds *[]string
 	CustomerId string
 }
 
-func CreateCheckoutSession(inp *CreateCheckoutSessionInput) (*stripe.CheckoutSession, error) {
+func (ctx *StripeServiceImpl) CreateCheckoutSession(inp *CreateCheckoutSessionInput) (*stripe.CheckoutSession, error) {
 	if *inp.ProductIds == nil || len(*inp.ProductIds) == 0 || inp.CustomerId == "" {
 		return nil, errors.New("ProductIds and CustomerId are required")
 	}
@@ -52,7 +71,7 @@ type CreateCustomerInput struct {
 	FullName string
 }
 
-func CreateCustomer(inp *CreateCustomerInput) (*stripe.Customer, error) {
+func (ctx *StripeServiceImpl) CreateCustomer(inp *CreateCustomerInput) (*stripe.Customer, error) {
 	params := &stripe.CustomerParams{
 		Name:  &inp.FullName,
 		Email: &inp.Email,
@@ -64,12 +83,12 @@ func CreateCustomer(inp *CreateCustomerInput) (*stripe.Customer, error) {
 	return result, err
 }
 
-func GetStripeSession(id string) (*stripe.CheckoutSession, error) {
+func (ctx *StripeServiceImpl) GetStripeSession(id string) (*stripe.CheckoutSession, error) {
 	s, err := session.Get(id, nil)
 	return s, err
 }
 
-func ProcceesStripeWebhook(payload []byte, reqSignature string) (int, error) {
+func (ctx *StripeServiceImpl) ProcceesStripeWebhook(payload []byte, reqSignature string) (int, error) {
 	// // If you are testing your webhook locally with the Stripe CLI you
 	// // can find the endpoint's secret by running `stripe listen`
 	// // Otherwise, find your endpoint's secret in your webhook settings
