@@ -14,6 +14,8 @@ import (
 type OrderRepository interface {
 	CreateOrder(inp *CreateOrderInput) (*model.PackageOrder, error)
 	GetAllOrders(id uuid.UUID) (*[]types.OrderAllDTO, error)
+	UpdateOrder(chkSessId string, paymInteId string, status string) (*model.PackageOrder, error)
+	CreateGeneratedPackage(orderId int) (*[]model.GeneratedPackage, error)
 }
 
 type OrderRepositoryImpl struct {
@@ -103,4 +105,12 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 		return nil, err
 	}
 	return uNewOrder, nil
+}
+
+func (r *OrderRepositoryImpl) UpdateOrder(chkSessId string, paymInteId string, status string) (*model.PackageOrder, error) {
+	return nil, nil
+}
+
+func (r *OrderRepositoryImpl) CreateGeneratedPackage(orderId int) (*[]model.GeneratedPackage, error) {
+	return nil, nil
 }
