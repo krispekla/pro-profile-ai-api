@@ -94,6 +94,18 @@ func ProcceesStripeWebhook(payload []byte, reqSignature string) (int, error) {
 
 	// Unmarshal the event data into an appropriate struct depending on its Type
 	switch event.Type {
+	case "checkout.session.completed":
+		var chkSession stripe.CheckoutSession
+		err := json.Unmarshal(event.Data.Raw, &chkSession)
+		if err != nil {
+			return http.StatusBadRequest, errors.New("error parsing webhook JSON")
+		}
+		// Update package order status, add payment intent
+
+		// Create generated package for all order items
+
+		// Send email to user about succesfull payment and with link for usage
+
 	case "payment_intent.succeeded":
 		var paymentIntent stripe.PaymentIntent
 		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
