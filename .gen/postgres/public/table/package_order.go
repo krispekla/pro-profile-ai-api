@@ -17,14 +17,15 @@ type packageOrderTable struct {
 	postgres.Table
 
 	// Columns
-	ID                    postgres.ColumnInteger
-	UserID                postgres.ColumnString
-	Created               postgres.ColumnTimestamp
-	TotalAmount           postgres.ColumnInteger
-	Currency              postgres.ColumnString
-	Status                postgres.ColumnString
-	CouponID              postgres.ColumnInteger
-	StripePaymentIntentID postgres.ColumnString
+	ID                      postgres.ColumnInteger
+	UserID                  postgres.ColumnString
+	Created                 postgres.ColumnTimestamp
+	TotalAmount             postgres.ColumnInteger
+	Currency                postgres.ColumnString
+	Status                  postgres.ColumnString
+	CouponID                postgres.ColumnInteger
+	StripePaymentIntentID   postgres.ColumnString
+	StripeCheckoutSessionID postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,30 +66,32 @@ func newPackageOrderTable(schemaName, tableName, alias string) *PackageOrderTabl
 
 func newPackageOrderTableImpl(schemaName, tableName, alias string) packageOrderTable {
 	var (
-		IDColumn                    = postgres.IntegerColumn("id")
-		UserIDColumn                = postgres.StringColumn("user_id")
-		CreatedColumn               = postgres.TimestampColumn("created")
-		TotalAmountColumn           = postgres.IntegerColumn("total_amount")
-		CurrencyColumn              = postgres.StringColumn("currency")
-		StatusColumn                = postgres.StringColumn("status")
-		CouponIDColumn              = postgres.IntegerColumn("coupon_id")
-		StripePaymentIntentIDColumn = postgres.StringColumn("stripe_payment_intent_id")
-		allColumns                  = postgres.ColumnList{IDColumn, UserIDColumn, CreatedColumn, TotalAmountColumn, CurrencyColumn, StatusColumn, CouponIDColumn, StripePaymentIntentIDColumn}
-		mutableColumns              = postgres.ColumnList{UserIDColumn, CreatedColumn, TotalAmountColumn, CurrencyColumn, StatusColumn, CouponIDColumn, StripePaymentIntentIDColumn}
+		IDColumn                      = postgres.IntegerColumn("id")
+		UserIDColumn                  = postgres.StringColumn("user_id")
+		CreatedColumn                 = postgres.TimestampColumn("created")
+		TotalAmountColumn             = postgres.IntegerColumn("total_amount")
+		CurrencyColumn                = postgres.StringColumn("currency")
+		StatusColumn                  = postgres.StringColumn("status")
+		CouponIDColumn                = postgres.IntegerColumn("coupon_id")
+		StripePaymentIntentIDColumn   = postgres.StringColumn("stripe_payment_intent_id")
+		StripeCheckoutSessionIDColumn = postgres.StringColumn("stripe_checkout_session_id")
+		allColumns                    = postgres.ColumnList{IDColumn, UserIDColumn, CreatedColumn, TotalAmountColumn, CurrencyColumn, StatusColumn, CouponIDColumn, StripePaymentIntentIDColumn, StripeCheckoutSessionIDColumn}
+		mutableColumns                = postgres.ColumnList{UserIDColumn, CreatedColumn, TotalAmountColumn, CurrencyColumn, StatusColumn, CouponIDColumn, StripePaymentIntentIDColumn, StripeCheckoutSessionIDColumn}
 	)
 
 	return packageOrderTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:                    IDColumn,
-		UserID:                UserIDColumn,
-		Created:               CreatedColumn,
-		TotalAmount:           TotalAmountColumn,
-		Currency:              CurrencyColumn,
-		Status:                StatusColumn,
-		CouponID:              CouponIDColumn,
-		StripePaymentIntentID: StripePaymentIntentIDColumn,
+		ID:                      IDColumn,
+		UserID:                  UserIDColumn,
+		Created:                 CreatedColumn,
+		TotalAmount:             TotalAmountColumn,
+		Currency:                CurrencyColumn,
+		Status:                  StatusColumn,
+		CouponID:                CouponIDColumn,
+		StripePaymentIntentID:   StripePaymentIntentIDColumn,
+		StripeCheckoutSessionID: StripeCheckoutSessionIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

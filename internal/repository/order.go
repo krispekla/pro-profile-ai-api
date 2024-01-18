@@ -41,22 +41,22 @@ func (r *OrderRepositoryImpl) GetAllOrders(id uuid.UUID) (*[]types.OrderAllDTO, 
 }
 
 type CreateOrderInput struct {
-	PaymentIntentId *string
-	Amount          *int64
-	Currency        string
-	UserId          *uuid.UUID
-	PackagePrices   *[]model.PackagePrice
-	CouponId        *string
+	Amount        *int64
+	Currency      string
+	UserId        *uuid.UUID
+	PackagePrices *[]model.PackagePrice
+	CouponId      *string
+	CheckoutId    *string
 }
 
 func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.PackageOrder, error) {
 	newOrderStmt := PackageOrder.INSERT(
-		PackageOrder.StripePaymentIntentID,
+		PackageOrder.StripeCheckoutSessionID,
 		PackageOrder.TotalAmount,
 		PackageOrder.Currency,
 		PackageOrder.UserID,
 	).VALUES(
-		inp.PaymentIntentId,
+		inp.CheckoutId,
 		inp.Amount,
 		inp.Currency,
 		&inp.UserId,

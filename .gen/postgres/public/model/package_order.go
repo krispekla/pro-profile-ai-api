@@ -13,12 +13,13 @@ import (
 )
 
 type PackageOrder struct {
-	ID                    int32 `sql:"primary_key"`
-	UserID                uuid.UUID
-	Created               time.Time
-	TotalAmount           int32
-	Currency              string
-	Status                OrderStatus
-	CouponID              *int32
-	StripePaymentIntentID *string
+	ID                      int32 `sql:"primary_key"`
+	UserID                  uuid.UUID
+	Created                 time.Time
+	TotalAmount             int32
+	Currency                string
+	Status                  OrderStatus
+	CouponID                *int32
+	StripePaymentIntentID   *string
+	StripeCheckoutSessionID *string
 }

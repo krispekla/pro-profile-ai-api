@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -307,11 +306,11 @@ func (h *Handler) CreateCheckoutSession() http.HandlerFunc {
 		}
 
 		oi := &repository.CreateOrderInput{
-			PaymentIntentId: &s.ID,
-			Amount:          &s.AmountTotal,
-			Currency:        string(s.Currency),
-			UserId:          &usrId,
-			PackagePrices:   pprices,
+			CheckoutId:    &s.ID,
+			Amount:        &s.AmountTotal,
+			Currency:      string(s.Currency),
+			UserId:        &usrId,
+			PackagePrices: pprices,
 		}
 
 		oCreated, err := h.OrderRepo.CreateOrder(oi)
@@ -343,7 +342,7 @@ func (h *Handler) StripeWebhookHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const MaxBodyBytes = int64(65536)
 		r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
-		payload, err := ioutil.ReadAll(r.Body)
+		payload, err := io.ReadAll(r.Body)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
 			w.WriteHeader(http.StatusServiceUnavailable)
