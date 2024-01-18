@@ -14,8 +14,8 @@ import (
 type OrderRepository interface {
 	CreateOrder(inp *CreateOrderInput) (*model.PackageOrder, error)
 	GetAllOrders(id uuid.UUID) (*[]types.OrderAllDTO, error)
-	UpdateOrder(chkSessId string, paymInteId string, status string) (*model.PackageOrder, error)
-	CreateGeneratedPackage(orderId int) (*[]model.GeneratedPackage, error)
+	UpdateOrder(chkSessId string, paymInteId string, status model.OrderStatus) (*model.PackageOrder, error)
+	CreateGeneratedPackage(orderId int32) (*[]model.GeneratedPackage, error)
 }
 
 type OrderRepositoryImpl struct {
@@ -107,10 +107,55 @@ func (r *OrderRepositoryImpl) CreateOrder(inp *CreateOrderInput) (*model.Package
 	return uNewOrder, nil
 }
 
-func (r *OrderRepositoryImpl) UpdateOrder(chkSessId string, paymInteId string, status string) (*model.PackageOrder, error) {
-	return nil, nil
+func (r *OrderRepositoryImpl) UpdateOrder(chkSessId string, paymInteId string, status model.OrderStatus) (*model.PackageOrder, error) {
+	updStmt := PackageOrder.UPDATE(
+		PackageOrder.StripePaymentIntentID, PackageOrder.Status,
+	).SET(
+		paymInteId, status.String(),
+	).WHERE(
+		PackageOrder.StripeCheckoutSessionID.EQ(String(chkSessId)),
+	).RETURNING(PackageOrder.AllColumns)
+
+	var result model.PackageOrder
+	err := updStmt.Query(r.db, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
-func (r *OrderRepositoryImpl) CreateGeneratedPackage(orderId int) (*[]model.GeneratedPackage, error) {
+func (r *OrderRepositoryImpl) CreateGeneratedPackage(orderId int32) (*[]model.GeneratedPackage, error) {
+	findOrderItemsStmt := PackageOrderItem.SELECT(
+		PackageOrderItem.AllColumns,
+	).WHERE(
+		PackageOrderItem.PackageOrderID.EQ(Int(int64(orderId))),
+	)
+
+	var orderItems []model.PackageOrderItem
+	err := findOrderItemsStmt.Query(r.db, &orderItems)
+	if err != nil {
+		return nil, err
+	}
+
+	var generatedPackages []model.GeneratedPackage
+	for _, item := range orderItems {
+		generatedPackages = append(generatedPackages, model.GeneratedPackage{
+			PackageOrderItemID: item.ID,
+			Status:             model.GeneratedPackageStatus_Created,
+		})
+	}
+
+	genPckgsStmt := GeneratedPackage.INSERT(
+		GeneratedPackage.PackageOrderItemID, GeneratedPackage.Status,
+	).MODELS(
+		&generatedPackages,
+	).RETURNING(GeneratedPackage.AllColumns)
+
+	var genPckgs *[]model.GeneratedPackage
+	err = genPckgsStmt.Query(r.db, &genPckgs)
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }

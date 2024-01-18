@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/krispekla/pro-profile-ai-api/.gen/postgres/public/model"
 	"github.com/krispekla/pro-profile-ai-api/internal/repository"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
@@ -25,7 +26,6 @@ type StripeServiceImpl struct {
 }
 
 func NewStripeServiceImpl(orderRepo repository.OrderRepository) *StripeServiceImpl {
-	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	return &StripeServiceImpl{
 		OrderRepo: orderRepo,
 	}
@@ -120,11 +120,23 @@ func (ctx *StripeServiceImpl) ProcceesStripeWebhook(payload []byte, reqSignature
 			return http.StatusBadRequest, errors.New("error parsing webhook JSON")
 		}
 		// Update package order status, add payment intent
-
+		if chkSession.ID == "" {
+			return http.StatusBadRequest, errors.New("checkout session id is empty")
+		}
+		if chkSession.PaymentIntent == nil || chkSession.PaymentIntent.ID == "" {
+			return http.StatusBadRequest, errors.New("payment intent is nil for checkout completed session")
+		}
+		ord, err := ctx.OrderRepo.UpdateOrder(chkSession.ID, chkSession.PaymentIntent.ID, model.OrderStatus_Paid)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
 		// Create generated package for all order items
-
-		// Send email to user about succesfull payment and with link for usage
-
+		_, err = ctx.OrderRepo.CreateGeneratedPackage(ord.ID)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+		// TODO: Send email to user about succesfull payment and with link for usage
+		return http.StatusOK, nil
 	case "payment_intent.succeeded":
 		var paymentIntent stripe.PaymentIntent
 		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
