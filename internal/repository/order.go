@@ -132,15 +132,15 @@ func (r *OrderRepositoryImpl) CreateGeneratedPackage(orderId int32) (*[]model.Ge
 		PackageOrderItem.PackageOrderID.EQ(Int(int64(orderId))),
 	)
 
-	var orderItems []model.PackageOrderItem
-	err := findOrderItemsStmt.Query(r.db, &orderItems)
+	orderItems := &[]model.PackageOrderItem{}
+	err := findOrderItemsStmt.Query(r.db, orderItems)
 	if err != nil {
 		return nil, err
 	}
 
-	var generatedPackages []model.GeneratedPackage
-	for _, item := range orderItems {
-		generatedPackages = append(generatedPackages, model.GeneratedPackage{
+	generatedPackages := &[]model.GeneratedPackage{}
+	for _, item := range *orderItems {
+		*generatedPackages = append(*generatedPackages, model.GeneratedPackage{
 			PackageOrderItemID: item.ID,
 			Status:             model.GeneratedPackageStatus_Created,
 		})
@@ -149,11 +149,11 @@ func (r *OrderRepositoryImpl) CreateGeneratedPackage(orderId int32) (*[]model.Ge
 	genPckgsStmt := GeneratedPackage.INSERT(
 		GeneratedPackage.PackageOrderItemID, GeneratedPackage.Status,
 	).MODELS(
-		&generatedPackages,
+		generatedPackages,
 	).RETURNING(GeneratedPackage.AllColumns)
 
-	var genPckgs *[]model.GeneratedPackage
-	err = genPckgsStmt.Query(r.db, &genPckgs)
+	genPckgs := &[]model.GeneratedPackage{}
+	err = genPckgsStmt.Query(r.db, genPckgs)
 	if err != nil {
 		return nil, err
 	}
