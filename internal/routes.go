@@ -36,5 +36,17 @@ func routes(app *Application) *chi.Mux {
 		// r.Get("/buckets/all", handlers.GetAllBuckets())
 		// r.Get("/image/presigned", handlers.GetPresignedImgUrl())
 	})
+
+	r.Route("/admin", func(r chi.Router) {
+		// r.Use(mdlw.AdminMiddleware())
+		// r.Get("/product/list", hls.GetProductListing())
+		// r.Post("/product", hls.CreateProduct())
+		// r.Put("/product/:id", hls.UpdateProduct())
+		// r.Delete("/product/:id", hls.DeleteProduct())
+		// r.Get("/product/coupon", hls.GetCoupons())
+		// r.Post("/product/coupon", hls.CreateCoupon())
+		// r.Put("/product/coupon/:id", hls.UpdateCoupon())
+		// r.Delete("/product/coupon/:id", hls.DeleteCoupon())
+	})
 	return r
 }
