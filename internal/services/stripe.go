@@ -137,6 +137,26 @@ func (ctx *StripeServiceImpl) ProcceesStripeWebhook(payload []byte, reqSignature
 		}
 		// TODO: Send email to user about succesfull payment and with link for usage
 		return http.StatusOK, nil
+	case "checkout.session.expired":
+		// TODO This has not been tested as it cannot be easily triggered.
+		// Need to go over the code and everything
+		var chkSession stripe.CheckoutSession
+		err := json.Unmarshal(event.Data.Raw, &chkSession)
+		if err != nil {
+			return http.StatusBadRequest, errors.New("error parsing webhook JSON")
+		}
+		// Update package order status
+		if chkSession.ID == "" {
+			return http.StatusBadRequest, errors.New("checkout session id is empty")
+		}
+		if chkSession.PaymentIntent == nil || chkSession.PaymentIntent.ID == "" {
+			return http.StatusBadRequest, errors.New("payment intent is nil for checkout completed session")
+		}
+		_, err = ctx.OrderRepo.UpdateOrder(chkSession.ID, chkSession.PaymentIntent.ID, model.OrderStatus_Cancelled)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+
 	case "payment_intent.succeeded":
 		var paymentIntent stripe.PaymentIntent
 		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
