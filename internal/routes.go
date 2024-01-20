@@ -23,8 +23,8 @@ func routes(app *Application) *chi.Mux {
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/user", hls.UserDetails())
 		r.Post("/user/webhook", hls.UserRegistrationWebhook())
-		r.Get("/characters", hls.GetCharacters())
-		r.Post("/characters", hls.CreateCharacter())
+		r.Get("/character/list", hls.GetCharacters())
+		r.Post("/character", hls.CreateCharacter())
 		r.Get("/packages/listing", hls.GetPackageListing())
 		r.Get("/packages/generated", hls.GetGeneratedPackages())
 		r.Get("/packages/:id", hls.GetPackageDetails())
