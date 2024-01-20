@@ -38,8 +38,14 @@ type CreateCharacterDTO struct {
 	Age       model.Age       `alias:"character.age" json:"age"`
 }
 
+type CharacterFullDTO struct {
+	CreateCharacterDTO `alias:"character"`
+	Imgs               *[]model.CharacterImg `alias:"character_img" json:"imgs"`
+}
+
 type CharacterRepository interface {
 	GetCharacter(id uuid.UUID) (*[]CharacterDTO, error)
+	GetCharacterFull(id uuid.UUID) (*[]CharacterFullDTO, error)
 	CreateCharacter(usrId uuid.UUID) (*CreateCharacterDTO, error)
 	UpdateCharacter(inp *UpdateCharacterInput) (*CreateCharacterDTO, error)
 }
