@@ -1,0 +1,1 @@
+drop trigger if exists "user_registration_webhook" on "auth"."users";
