@@ -224,9 +224,48 @@ func (h *Handler) BuyPackage() http.HandlerFunc {
 
 func (h *Handler) CreateCharacter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		usr := r.Context().Value(types.UserContextKey).(*types.JwtUser)
+		usrId, err := uuid.Parse(usr.Id)
+		if err != nil {
+			h.ErrorLog.Print("Error parsing uuid")
+		}
+		chrNew, err := h.CharacterRepo.CreateCharacter(usrId)
+		if err != nil {
+			h.ErrorLog.Print("Error creating character")
+			return
+		}
+		chrJson, err := json.Marshal(chrNew)
+		if err != nil {
+			h.ErrorLog.Print("Error marshaling character")
+			return
+		}
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "Character created"}`))
+		w.Write(chrJson)
+	}
+}
+
+func (h *Handler) UpdateCharacter() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body repository.UpdateCharacterInput
+		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			h.ErrorLog.Print("Error decoding character body")
+			return
+		}
+		chrNew, err := h.CharacterRepo.UpdateCharacter(&body)
+		if err != nil {
+			h.ErrorLog.Print("Error updating character")
+			return
+		}
+		chrJson, err := json.Marshal(chrNew)
+		if err != nil {
+			h.ErrorLog.Print("Error marshaling character")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(chrJson)
 	}
 }
 
