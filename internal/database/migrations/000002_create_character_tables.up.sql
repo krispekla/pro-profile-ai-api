@@ -44,12 +44,12 @@ END $$;
 CREATE TABLE IF NOT EXISTS character (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES auth.users (id) NOT NULL,
-    name TEXT NOT NULL,
-    gender gender NOT NULL,
-    hair_color hair_color NOT NULL,
-    eye_color eye_color NOT NULL,
-    ethnicity ethnicity NOT NULL,
-    age age NOT NULL,
+    name TEXT,
+    gender gender NOT NULL DEFAULT 'other',
+    hair_color hair_color NOT NULL DEFAULT 'other',
+    eye_color eye_color NOT NULL DEFAULT 'brown',
+    ethnicity ethnicity NOT NULL DEFAULT 'other',
+    age age NOT NULL DEFAULT 'adult',
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS character_img (
