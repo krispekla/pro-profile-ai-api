@@ -1,4 +1,4 @@
-
+# include .env.local
 db_con ?= "postgres://$$PPAI_API_DB_USER:$$PPAI_API_DB_PASSWORD@$$PPAI_API_DB_HOST:$$PPAI_API_DB_PORT/$$PPAI_API_DB_NAME?sslmode=disable"
 
 # ==================================================================================== #
@@ -107,3 +107,7 @@ seed:
 generate:
 	jet -dsn=$(db_con) -schema=auth -path=./.gen
 	jet -dsn=$(db_con) -schema=public -path=./.gen
+
+.PHONY: env/read
+env/read:
+	$(shell export $(grep -v '^#' .env | xargs))
